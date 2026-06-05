@@ -1,6 +1,6 @@
-import type { Env } from '../types';
-import { isAuthError, requireAuth } from '../utils/auth';
-import { error, handleOptions, json } from '../utils/response';
+import type { Env } from '../../types';
+import { isAuthError, requireAuth } from '../../utils/auth';
+import { error, handleOptions, json } from '../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;

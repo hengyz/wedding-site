@@ -1,6 +1,6 @@
-import type { Env } from '../types';
-import { signToken } from '../utils/auth';
-import { error, handleOptions, json, parseBody } from '../utils/response';
+import type { Env } from '../../types';
+import { signToken } from '../../utils/auth';
+import { error, handleOptions, json, parseBody } from '../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (context.request.method === 'OPTIONS') return handleOptions();
