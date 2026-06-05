@@ -14,6 +14,14 @@ function base64UrlDecode(str: string): string {
   return atob(base64);
 }
 
+function base64UrlToBytes(str: string): Uint8Array {
+  return Uint8Array.from(base64UrlDecode(str), (c) => c.charCodeAt(0));
+}
+
+export function getJwtSecret(env: { JWT_SECRET?: string }): string {
+  return (env.JWT_SECRET || 'dev-secret-change-me').trim();
+}
+
 async function getKey(secret: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   return crypto.subtle.importKey(
@@ -57,10 +65,7 @@ export async function verifyToken(
     const valid = await crypto.subtle.verify(
       'HMAC',
       key,
-      Uint8Array.from(
-        atob(sig.replace(/-/g, '+').replace(/_/g, '/')),
-        (c) => c.charCodeAt(0)
-      ),
+      base64UrlToBytes(sig),
       new TextEncoder().encode(data)
     );
     if (!valid) return null;

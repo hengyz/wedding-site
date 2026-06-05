@@ -1,5 +1,5 @@
 import type { Env } from '../../types';
-import { signToken } from '../../utils/auth';
+import { signToken, getJwtSecret } from '../../utils/auth';
 import { error, handleOptions, json, parseBody } from '../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -10,7 +10,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (!body?.password) return error('请输入密码');
 
   const adminPassword = (context.env.ADMIN_PASSWORD || 'admin123').trim();
-  const jwtSecret = (context.env.JWT_SECRET || 'dev-secret-change-me').trim();
+  const jwtSecret = getJwtSecret(context.env);
 
   if (body.password.trim() !== adminPassword) {
     return error('密码错误', 401);

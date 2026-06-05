@@ -1,12 +1,12 @@
 import type { Env } from '../../../types';
-import { isAuthError, requireAuth } from '../../../utils/auth';
+import { isAuthError, requireAuth, getJwtSecret } from '../../../utils/auth';
 import { error, handleOptions, json, parseBody } from '../../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env, params } = context;
   if (request.method === 'OPTIONS') return handleOptions();
 
-  const jwtSecret = env.JWT_SECRET || 'dev-secret-change-me';
+  const jwtSecret = getJwtSecret(env);
   const auth = await requireAuth(request, jwtSecret);
   if (isAuthError(auth)) return auth;
 
