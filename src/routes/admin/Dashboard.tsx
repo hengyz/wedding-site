@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { api, SITE_MODES, type SiteConfig } from '../../lib/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { api, ApiError, SITE_MODES, type SiteConfig } from '../../lib/api';
+import { clearToken } from '../../lib/auth';
 import { formatWeddingDate } from '../../lib/date';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 
 export function AdminDashboard() {
+  const navigate = useNavigate();
   const [config, setConfig] = useState<(SiteConfig & { updated_at?: string }) | null>(null);
   const [loadError, setLoadError] = useState('');
 
@@ -14,9 +16,14 @@ export function AdminDashboard() {
       .then(setConfig)
       .catch((err) => {
         console.error(err);
+        if (err instanceof ApiError && err.status === 401) {
+          clearToken();
+          navigate('/admin/login', { replace: true });
+          return;
+        }
         setLoadError(err instanceof Error ? err.message : '加载失败');
       });
-  }, []);
+  }, [navigate]);
 
   const switchMode = async (mode: SiteConfig['mode']) => {
     const updated = await api.adminUpdateConfig({ mode });

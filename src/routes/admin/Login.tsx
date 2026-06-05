@@ -19,7 +19,7 @@ export function AdminLogin() {
     try {
       const { token } = await api.adminLogin(password);
       setToken(token);
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '登录失败');
     } finally {

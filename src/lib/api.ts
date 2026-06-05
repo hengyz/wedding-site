@@ -78,7 +78,6 @@ async function request<T>(
       path !== '/api/admin/login'
     ) {
       clearToken();
-      window.location.href = '/admin/login';
     }
     throw err;
   }

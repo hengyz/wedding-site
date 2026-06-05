@@ -16,13 +16,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return error('密码错误', 401);
   }
 
-  const token = await signToken(
-    {
-      sub: 'admin',
-      exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
-    },
-    jwtSecret
-  );
+  const token = await signToken(jwtSecret);
 
   return json({ token });
 };

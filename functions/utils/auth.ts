@@ -1,54 +1,20 @@
+import { SignJWT, jwtVerify } from 'jose';
 import type { JWTPayload } from '../types';
-
-function base64UrlEncode(data: ArrayBuffer | string): string {
-  const str =
-    typeof data === 'string'
-      ? data
-      : btoa(String.fromCharCode(...new Uint8Array(data)));
-  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function base64UrlDecode(str: string): string {
-  const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
-  const base64 = padded.replace(/-/g, '+').replace(/_/g, '/');
-  return atob(base64);
-}
-
-function base64UrlToBytes(str: string): Uint8Array {
-  return Uint8Array.from(base64UrlDecode(str), (c) => c.charCodeAt(0));
-}
 
 export function getJwtSecret(env: { JWT_SECRET?: string }): string {
   return (env.JWT_SECRET || 'dev-secret-change-me').trim();
 }
 
-async function getKey(secret: string): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  return crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign', 'verify']
-  );
+function secretKey(secret: string): Uint8Array {
+  return new TextEncoder().encode(secret);
 }
 
-export async function signToken(
-  payload: Omit<JWTPayload, 'iat'>,
-  secret: string
-): Promise<string> {
-  const header = base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const body = base64UrlEncode(
-    JSON.stringify({ ...payload, iat: Math.floor(Date.now() / 1000) })
-  );
-  const data = `${header}.${body}`;
-  const key = await getKey(secret);
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(data)
-  );
-  return `${data}.${base64UrlEncode(signature)}`;
+export async function signToken(secret: string): Promise<string> {
+  return new SignJWT({ sub: 'admin' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(secretKey(secret));
 }
 
 export async function verifyToken(
@@ -56,23 +22,13 @@ export async function verifyToken(
   secret: string
 ): Promise<JWTPayload | null> {
   try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-
-    const [header, body, sig] = parts;
-    const data = `${header}.${body}`;
-    const key = await getKey(secret);
-    const valid = await crypto.subtle.verify(
-      'HMAC',
-      key,
-      base64UrlToBytes(sig),
-      new TextEncoder().encode(data)
-    );
-    if (!valid) return null;
-
-    const payload = JSON.parse(base64UrlDecode(body)) as JWTPayload;
-    if (payload.exp < Math.floor(Date.now() / 1000)) return null;
-    return payload;
+    const { payload } = await jwtVerify(token, secretKey(secret));
+    if (!payload.sub || !payload.exp || !payload.iat) return null;
+    return {
+      sub: String(payload.sub),
+      exp: payload.exp,
+      iat: payload.iat,
+    };
   } catch {
     return null;
   }
@@ -89,7 +45,7 @@ export async function requireAuth(
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  const token = auth.slice(7);
+  const token = auth.slice(7).trim();
   const payload = await verifyToken(token, secret);
   if (!payload) {
     return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
