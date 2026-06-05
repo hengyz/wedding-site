@@ -1,7 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 
-const SITE_TITLE = '光影世界';
-
 const navItems = [
   { path: '/', label: '首页', icon: '🏠' },
   { path: '/wedding', label: '详情', icon: '💒' },
@@ -14,13 +12,6 @@ export function PublicLayout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream-50 via-blush-100/30 to-cream-100">
-      <header className="sticky top-0 z-40 border-b border-cream-200/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-lg items-center justify-center px-4 py-3">
-          <Link to="/" className="font-serif text-lg font-semibold tracking-widest text-champagne-600">
-            {SITE_TITLE}
-          </Link>
-        </div>
-      </header>
       <main>
         <Outlet />
       </main>
