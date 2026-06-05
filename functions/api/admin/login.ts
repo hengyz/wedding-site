@@ -9,10 +9,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const body = await parseBody<{ password?: string }>(context.request);
   if (!body?.password) return error('请输入密码');
 
-  const adminPassword = context.env.ADMIN_PASSWORD || 'admin123';
-  const jwtSecret = context.env.JWT_SECRET || 'dev-secret-change-me';
+  const adminPassword = (context.env.ADMIN_PASSWORD || 'admin123').trim();
+  const jwtSecret = (context.env.JWT_SECRET || 'dev-secret-change-me').trim();
 
-  if (body.password !== adminPassword) {
+  if (body.password.trim() !== adminPassword) {
     return error('密码错误', 401);
   }
 

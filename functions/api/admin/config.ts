@@ -7,7 +7,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   if (request.method === 'OPTIONS') return handleOptions();
 
-  const jwtSecret = env.JWT_SECRET || 'dev-secret-change-me';
+  const jwtSecret = (env.JWT_SECRET || 'dev-secret-change-me').trim();
   const auth = await requireAuth(request, jwtSecret);
   if (isAuthError(auth)) return auth;
 
