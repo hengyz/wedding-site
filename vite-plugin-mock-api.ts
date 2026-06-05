@@ -1,0 +1,270 @@
+import type { Plugin } from 'vite';
+
+const seedConfig = {
+  id: 1,
+  couple_name: '新郎 & 新娘',
+  groom_name: '新郎',
+  bride_name: '新娘',
+  wedding_date: '2026-10-01T04:00:00.000Z',
+  venue_name: '幸福大酒店',
+  venue_address: '北京市朝阳区幸福路 88 号',
+  hero_image_url:
+    'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
+  mv_url: '',
+  mv_cover_url: '',
+  photo_live_url: '',
+  amap_url: '',
+  baidu_map_url: '',
+  tencent_map_url: '',
+  dress_code: '建议穿着正装或礼服，浅色系为佳。',
+  notes: '请准时到场，如有特殊饮食需求请提前告知新人。',
+  mode: 'before_wedding' as const,
+  updated_at: new Date().toISOString(),
+};
+
+const seedSchedules = [
+  { id: 1, time: '11:30', title: '宾客签到', description: '在酒店大堂签到，领取座位卡', sort_order: 1, enabled: 1 },
+  { id: 2, time: '12:00', title: '婚礼仪式', description: '主宴会厅举行婚礼仪式', sort_order: 2, enabled: 1 },
+  { id: 3, time: '12:30', title: '合影留念', description: '与新人及亲友合影', sort_order: 3, enabled: 1 },
+  { id: 4, time: '13:00', title: '婚宴午宴', description: '享用婚宴，期间有互动环节', sort_order: 4, enabled: 1 },
+  { id: 5, time: '15:00', title: '送客', description: '感谢各位来宾的光临', sort_order: 5, enabled: 1 },
+];
+
+const seedPhotos = [
+  {
+    id: 1,
+    url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80',
+    thumbnail_url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80',
+    category: 'pre_wedding',
+    title: '婚纱照 1',
+    sort_order: 1,
+    enabled: 1,
+  },
+  {
+    id: 2,
+    url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80',
+    thumbnail_url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&q=80',
+    category: 'pre_wedding',
+    title: '婚纱照 2',
+    sort_order: 2,
+    enabled: 1,
+  },
+  {
+    id: 3,
+    url: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&q=80',
+    thumbnail_url: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&q=80',
+    category: 'travel',
+    title: '旅行照 1',
+    sort_order: 3,
+    enabled: 1,
+  },
+];
+
+let blessings = [
+  { id: 1, name: '张三', content: '祝你们百年好合，永结同心！', status: 'approved', created_at: new Date().toISOString() },
+  { id: 2, name: '李四', content: '新婚快乐，早生贵子！', status: 'approved', created_at: new Date().toISOString() },
+];
+let nextBlessingId = 3;
+let nextScheduleId = 6;
+let nextPhotoId = 4;
+
+function json(res: unknown, status = 200) {
+  return new Response(JSON.stringify(res), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function publicConfig() {
+  const { id: _id, updated_at: _u, ...rest } = seedConfig;
+  return rest;
+}
+
+export function mockApiPlugin(): Plugin {
+  return {
+    name: 'mock-api',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith('/api')) return next();
+
+        const url = new URL(req.url, 'http://localhost');
+        const path = url.pathname;
+        const method = req.method || 'GET';
+
+        const send = (body: unknown, status = 200) => {
+          res.statusCode = status;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(body));
+        };
+
+        try {
+          if (path === '/api/config' && method === 'GET') {
+            return send(publicConfig());
+          }
+
+          if (path === '/api/schedules' && method === 'GET') {
+            return send(seedSchedules.filter((s) => s.enabled));
+          }
+
+          if (path === '/api/photos' && method === 'GET') {
+            const cat = url.searchParams.get('category');
+            const list = seedPhotos.filter((p) => p.enabled && (!cat || p.category === cat));
+            return send(list);
+          }
+
+          if (path === '/api/blessings') {
+            if (method === 'GET') {
+              return send(blessings.filter((b) => b.status === 'approved'));
+            }
+            if (method === 'POST') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                const data = JSON.parse(body || '{}');
+                const item = {
+                  id: nextBlessingId++,
+                  name: data.name,
+                  content: data.content,
+                  status: 'pending',
+                  created_at: new Date().toISOString(),
+                };
+                blessings.unshift(item);
+                send({ id: item.id, message: '提交成功，审核通过后将展示（Mock 模式）' }, 201);
+              });
+              return;
+            }
+          }
+
+          if (path === '/api/admin/login' && method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => { body += chunk; });
+            req.on('end', () => {
+              const data = JSON.parse(body || '{}');
+              if (data.password === 'admin123') {
+                send({ token: 'mock-dev-token' });
+              } else {
+                send({ error: '密码错误' }, 401);
+              }
+            });
+            return;
+          }
+
+          const isAdmin = req.headers.authorization === 'Bearer mock-dev-token';
+
+          if (path === '/api/admin/config') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            if (method === 'GET') return send(seedConfig);
+            if (method === 'PUT') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                Object.assign(seedConfig, JSON.parse(body || '{}'));
+                seedConfig.updated_at = new Date().toISOString();
+                send(seedConfig);
+              });
+              return;
+            }
+          }
+
+          if (path === '/api/admin/schedules') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            if (method === 'GET') return send(seedSchedules);
+            if (method === 'POST') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                const data = JSON.parse(body || '{}');
+                const item = { id: nextScheduleId++, ...data, enabled: data.enabled ?? 1 };
+                seedSchedules.push(item);
+                send(item, 201);
+              });
+              return;
+            }
+          }
+
+          const scheduleMatch = path.match(/^\/api\/admin\/schedules\/(\d+)$/);
+          if (scheduleMatch && isAdmin) {
+            const id = Number(scheduleMatch[1]);
+            const idx = seedSchedules.findIndex((s) => s.id === id);
+            if (method === 'PUT') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                if (idx >= 0) Object.assign(seedSchedules[idx], JSON.parse(body || '{}'));
+                send(seedSchedules[idx] || {});
+              });
+              return;
+            }
+            if (method === 'DELETE') {
+              if (idx >= 0) seedSchedules.splice(idx, 1);
+              return send({ success: true });
+            }
+          }
+
+          if (path === '/api/admin/photos') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            if (method === 'GET') return send(seedPhotos);
+            if (method === 'POST') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                const data = JSON.parse(body || '{}');
+                const item = {
+                  id: nextPhotoId++,
+                  ...data,
+                  thumbnail_url: data.thumbnail_url || data.url,
+                  enabled: data.enabled ?? 1,
+                };
+                seedPhotos.push(item);
+                send(item, 201);
+              });
+              return;
+            }
+          }
+
+          const photoMatch = path.match(/^\/api\/admin\/photos\/(\d+)$/);
+          if (photoMatch && isAdmin) {
+            const id = Number(photoMatch[1]);
+            const idx = seedPhotos.findIndex((p) => p.id === id);
+            if (method === 'PUT') {
+              let body = '';
+              req.on('data', (chunk) => { body += chunk; });
+              req.on('end', () => {
+                if (idx >= 0) Object.assign(seedPhotos[idx], JSON.parse(body || '{}'));
+                send(seedPhotos[idx] || {});
+              });
+              return;
+            }
+            if (method === 'DELETE') {
+              if (idx >= 0) seedPhotos.splice(idx, 1);
+              return send({ success: true });
+            }
+          }
+
+          if (path === '/api/admin/blessings' && method === 'GET') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            return send(blessings);
+          }
+
+          const blessingMatch = path.match(/^\/api\/admin\/blessings\/(\d+)$/);
+          if (blessingMatch && isAdmin && method === 'PUT') {
+            const id = Number(blessingMatch[1]);
+            let body = '';
+            req.on('data', (chunk) => { body += chunk; });
+            req.on('end', () => {
+              const data = JSON.parse(body || '{}');
+              const item = blessings.find((b) => b.id === id);
+              if (item) item.status = data.status;
+              send(item || {});
+            });
+            return;
+          }
+
+          send({ error: 'Not found' }, 404);
+        } catch (e) {
+          send({ error: String(e) }, 500);
+        }
+      });
+    },
+  };
+}

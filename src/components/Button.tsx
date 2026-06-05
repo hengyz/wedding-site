@@ -1,0 +1,58 @@
+import { Link } from 'react-router-dom';
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  to?: string;
+}
+
+const variants = {
+  primary:
+    'bg-champagne-500 text-white hover:bg-champagne-600 shadow-sm',
+  secondary:
+    'bg-white text-champagne-600 border border-champagne-400 hover:bg-cream-100',
+  ghost: 'bg-transparent text-champagne-600 hover:bg-cream-100',
+  danger: 'bg-red-500 text-white hover:bg-red-600',
+};
+
+const sizes = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-4 py-2.5 text-base',
+  lg: 'px-6 py-3 text-lg',
+};
+
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  fullWidth,
+  className = '',
+  to,
+  children,
+  ...props
+}: ButtonProps) {
+  const cls = [
+    'inline-flex items-center justify-center rounded-xl font-medium transition',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+    variants[variant],
+    sizes[size],
+    fullWidth ? 'w-full' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  if (to) {
+    return (
+      <Link to={to} className={cls}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <button className={cls} {...props}>
+      {children}
+    </button>
+  );
+}

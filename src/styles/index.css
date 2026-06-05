@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-cream-50 text-gray-800 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .page-container {
+    @apply mx-auto max-w-lg px-4 pb-24 pt-4;
+  }
+
+  .section-title {
+    @apply font-serif text-2xl font-semibold text-champagne-600 text-center mb-6;
+  }
+
+  .nav-link {
+    @apply flex flex-col items-center gap-1 rounded-xl bg-white/80 p-3 shadow-sm
+           border border-cream-200 transition hover:shadow-md hover:border-champagne-400;
+  }
+}
