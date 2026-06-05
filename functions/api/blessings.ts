@@ -1,4 +1,5 @@
 import type { Env } from '../types';
+import { requireDb, isDbError } from '../utils/db';
 import {
   error,
   getClientIp,
@@ -16,8 +17,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   if (request.method === 'OPTIONS') return handleOptions();
 
+  const db = requireDb(env);
+  if (isDbError(db)) return db;
+
   if (request.method === 'GET') {
-    const { results } = await env.DB.prepare(
+    const { results } = await db.prepare(
       "SELECT id, name, content, created_at FROM blessings WHERE status = 'approved' ORDER BY created_at DESC LIMIT 100"
     ).all();
     return json(results);
@@ -34,7 +38,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const ip = getClientIp(request);
     const userAgent = request.headers.get('User-Agent') || '';
 
-    const recent = await env.DB.prepare(
+    const recent = await db.prepare(
       `SELECT id FROM blessings
        WHERE ip = ? AND created_at > datetime('now', '-${RATE_LIMIT_MINUTES} minutes')
        LIMIT 1`
@@ -46,7 +50,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return error(`请 ${RATE_LIMIT_MINUTES} 分钟后再提交`, 429);
     }
 
-    const result = await env.DB.prepare(
+    const result = await db.prepare(
       'INSERT INTO blessings (name, content, status, ip, user_agent) VALUES (?, ?, ?, ?, ?)'
     )
       .bind(name, content, 'pending', ip, userAgent)

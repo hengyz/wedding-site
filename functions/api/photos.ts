@@ -1,9 +1,13 @@
 import type { Env } from '../types';
+import { requireDb, isDbError } from '../utils/db';
 import { error, handleOptions, json } from '../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (context.request.method === 'OPTIONS') return handleOptions();
   if (context.request.method !== 'GET') return error('Method not allowed', 405);
+
+  const db = requireDb(context.env);
+  if (isDbError(db)) return db;
 
   const url = new URL(context.request.url);
   const category = url.searchParams.get('category');
@@ -18,7 +22,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   query += ' ORDER BY sort_order ASC, id ASC';
 
-  const stmt = context.env.DB.prepare(query);
+  const stmt = db.prepare(query);
   const { results } = params.length
     ? await stmt.bind(...params).all()
     : await stmt.all();

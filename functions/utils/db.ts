@@ -1,4 +1,19 @@
-import type { SiteConfig } from '../types';
+import type { Env, SiteConfig } from '../types';
+import { error } from './response';
+
+export function requireDb(env: Env): D1Database | Response {
+  if (!env.DB) {
+    return error(
+      'Database not bound. Bind D1 as DB in Cloudflare Pages → Settings → Functions.',
+      503
+    );
+  }
+  return env.DB;
+}
+
+export function isDbError(result: D1Database | Response): result is Response {
+  return result instanceof Response;
+}
 
 export async function getSiteConfig(db: D1Database): Promise<SiteConfig | null> {
   return db
