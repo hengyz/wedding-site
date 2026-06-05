@@ -44,6 +44,8 @@ export interface Blessing {
   created_at: string;
 }
 
+import { clearToken } from './auth';
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -66,10 +68,19 @@ async function request<T>(
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new ApiError(
+    const err = new ApiError(
       (data as { error?: string }).error || res.statusText,
       res.status
     );
+    if (
+      res.status === 401 &&
+      path.startsWith('/api/admin/') &&
+      path !== '/api/admin/login'
+    ) {
+      clearToken();
+      window.location.href = '/admin/login';
+    }
+    throw err;
   }
 
   if (res.status === 204) return undefined as T;

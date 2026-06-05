@@ -7,15 +7,30 @@ import { Button } from '../../components/Button';
 
 export function AdminDashboard() {
   const [config, setConfig] = useState<(SiteConfig & { updated_at?: string }) | null>(null);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    api.adminGetConfig().then(setConfig).catch(console.error);
+    api.adminGetConfig()
+      .then(setConfig)
+      .catch((err) => {
+        console.error(err);
+        setLoadError(err instanceof Error ? err.message : '加载失败');
+      });
   }, []);
 
   const switchMode = async (mode: SiteConfig['mode']) => {
     const updated = await api.adminUpdateConfig({ mode });
     setConfig(updated);
   };
+
+  if (loadError) {
+    return (
+      <div className="text-center py-12 space-y-2">
+        <p className="text-red-500">{loadError}</p>
+        <p className="text-sm text-gray-500">请重新登录后再试</p>
+      </div>
+    );
+  }
 
   if (!config) {
     return <div className="text-center text-gray-400 py-12">加载中...</div>;
