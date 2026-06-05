@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 
 const SITE_TITLE = '光影世界';
@@ -12,10 +11,6 @@ const navItems = [
 
 export function PublicLayout() {
   const location = useLocation();
-
-  useEffect(() => {
-    document.title = SITE_TITLE;
-  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream-50 via-blush-100/30 to-cream-100">
