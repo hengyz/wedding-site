@@ -44,21 +44,23 @@ export function Gallery() {
       ) : photos.length === 0 ? (
         <div className="text-center text-gray-400 py-12">暂无照片</div>
       ) : (
-        <div className="columns-2 gap-3 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="break-inside-avoid cursor-pointer overflow-hidden rounded-xl shadow-sm"
+              className="cursor-pointer overflow-hidden rounded-xl shadow-sm bg-white"
               onClick={() => setPreview(photo)}
             >
-              <img
-                src={photo.thumbnail_url || photo.url}
-                alt={photo.title}
-                loading="lazy"
-                className="w-full object-cover transition hover:scale-105"
-              />
+              <div className="aspect-square w-full overflow-hidden bg-cream-100">
+                <img
+                  src={photo.thumbnail_url || photo.url}
+                  alt={photo.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition hover:scale-105"
+                />
+              </div>
               {photo.title && (
-                <p className="bg-white/90 px-2 py-1 text-xs text-gray-600 truncate">
+                <p className="px-2 py-1.5 text-xs text-gray-600 truncate">
                   {photo.title}
                 </p>
               )}
