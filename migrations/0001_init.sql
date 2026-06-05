@@ -65,7 +65,7 @@ INSERT INTO site_config (
   dress_code, notes, mode
 ) VALUES (
   1,
-  '新郎 & 新娘',
+  '光影世界',
   '新郎',
   '新娘',
   '2026-10-01T12:00:00',

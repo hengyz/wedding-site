@@ -174,6 +174,34 @@ export const api = {
       headers: authHeaders(),
     }),
 
+  adminUploadPhoto: async (
+    file: File,
+    data: { category?: string; title?: string } = {}
+  ) => {
+    const form = new FormData();
+    form.append('file', file);
+    if (data.category) form.append('category', data.category);
+    if (data.title) form.append('title', data.title);
+
+    const res = await fetch('/api/admin/photos/upload', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const err = new ApiError(
+        (body as { error?: string }).error || res.statusText,
+        res.status
+      );
+      if (res.status === 401) clearToken();
+      throw err;
+    }
+
+    return res.json() as Promise<Photo>;
+  },
+
   adminGetBlessings: () =>
     request<Blessing[]>('/api/admin/blessings', { headers: authHeaders() }),
 

@@ -2,7 +2,7 @@ import type { Plugin } from 'vite';
 
 const seedConfig = {
   id: 1,
-  couple_name: '新郎 & 新娘',
+  couple_name: '光影世界',
   groom_name: '新郎',
   bride_name: '新娘',
   wedding_date: '2026-10-01T04:00:00.000Z',
@@ -199,6 +199,20 @@ export function mockApiPlugin(): Plugin {
               if (idx >= 0) seedSchedules.splice(idx, 1);
               return send({ success: true });
             }
+          }
+
+          if (path === '/api/admin/photos/upload' && method === 'POST') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            send({
+              id: nextPhotoId++,
+              url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80',
+              thumbnail_url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80',
+              category: 'pre_wedding',
+              title: 'Mock 上传',
+              sort_order: seedPhotos.length + 1,
+              enabled: 1,
+            }, 201);
+            return;
           }
 
           if (path === '/api/admin/photos') {

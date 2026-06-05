@@ -1,4 +1,4 @@
 ADMIN_PASSWORD=admin123
 JWT_SECRET=dev-secret-change-me-in-production
-# R2 公共访问域名（在 R2 → Settings → Public access 绑定后填写）
-# R2_PUBLIC_URL=https://photos.yourdomain.com
+# R2 公共访问域名（上传功能必需）
+R2_PUBLIC_URL=https://photos.guangying.world
