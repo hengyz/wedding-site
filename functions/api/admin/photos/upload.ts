@@ -1,6 +1,7 @@
 import type { Env } from '../../../types';
 import { isAuthError, requireAuth, getJwtSecret } from '../../../utils/auth';
 import { requireDb, isDbError } from '../../../utils/db';
+import { buildR2Key } from '../../../utils/r2';
 import { error, handleOptions, json } from '../../../utils/response';
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -70,7 +71,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const category = (formData.get('category')?.toString() || 'pre_wedding').trim();
   const title = (formData.get('title')?.toString() || file.name.replace(/\.[^.]+$/, '')).trim();
   const ext = extFromType(file.type);
-  const key = `photos/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+  const key = buildR2Key(`${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`);
 
   await env.PHOTOS.put(key, file.stream(), {
     httpMetadata: { contentType: file.type },

@@ -1,5 +1,6 @@
 import type { Env } from '../../../types';
 import { isAuthError, requireAuth, getJwtSecret } from '../../../utils/auth';
+import { buildR2Key } from '../../../utils/r2';
 import { error, handleOptions, json, parseBody } from '../../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -20,7 +21,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (!body?.filename?.trim()) return error('filename 不能为空');
 
   const safeName = body.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const key = `photos/${Date.now()}-${safeName}`;
+  const key = buildR2Key(`${Date.now()}-${safeName}`);
   const contentType = body.contentType || 'image/jpeg';
 
   if (!env.PHOTOS) {

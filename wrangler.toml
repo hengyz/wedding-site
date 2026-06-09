@@ -9,7 +9,8 @@ database_id = "c6fe5eb9-425e-4f94-a31e-03b801511919"
 
 [[r2_buckets]]
 binding = "PHOTOS"
-bucket_name = "wedding-photos"
+bucket_name = "photos"
+# Shared bucket: wedding-site uses `wedding/` prefix, life-site uses `life/` prefix
 
 [vars]
 # Override in Cloudflare Dashboard or .dev.vars for local dev

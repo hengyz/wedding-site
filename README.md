@@ -105,10 +105,12 @@ R2_PUBLIC_URL=https://photos.yourdomain.com
 
 ## R2 图片存储绑定
 
-### 1. 创建 R2 Bucket
+与 `life-site` 共用 R2 bucket `photos`，wedding 上传文件存于 `wedding/` 目录。
+
+### 1. 创建 R2 Bucket（若尚未创建）
 
 ```bash
-npx wrangler r2 bucket create wedding-photos
+npx wrangler r2 bucket create photos
 ```
 
 ### 2. 绑定到 Pages 项目
@@ -118,14 +120,16 @@ npx wrangler r2 bucket create wedding-photos
 ```toml
 [[r2_buckets]]
 binding = "PHOTOS"
-bucket_name = "wedding-photos"
+bucket_name = "photos"
 ```
+
+上传时 object key 前缀为 `wedding/`（见 `functions/utils/r2.ts`）。
 
 ### 3. 配置公共访问（可选）
 
-在 Cloudflare Dashboard → R2 → wedding-photos → Settings → Public access，开启并绑定自定义域名，例如 `photos.yourdomain.com`。
+在 Cloudflare Dashboard → R2 → photos → Settings → Public access，开启并绑定自定义域名，例如 `photos.guangying.world`。
 
-将域名填入 `R2_PUBLIC_URL` 环境变量。
+将域名填入 `R2_PUBLIC_URL` 环境变量。访问 URL 形如 `https://photos.guangying.world/wedding/xxx.jpg`。
 
 ### MVP 照片管理
 
@@ -158,7 +162,7 @@ npm run deploy
 Dashboard → Pages → 项目 → Settings → Functions：
 
 - **D1 database bindings**: `DB` → `wedding-db`
-- **R2 bucket bindings**: `PHOTOS` → `wedding-photos`
+- **R2 bucket bindings**: `PHOTOS` → `photos`
 
 或在 `wrangler.toml` 配置后通过 Wrangler 部署自动绑定。
 
