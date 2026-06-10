@@ -42,11 +42,28 @@ export function ConfigEditor() {
       <h2 className="font-medium">网站配置</h2>
 
       <Card className="space-y-4">
-        <Input label="新人称呼" value={form.couple_name || ''} onChange={(e) => update('couple_name', e.target.value)} />
+        <Input
+          label="站点名称"
+          value={form.couple_name || ''}
+          onChange={(e) => update('couple_name', e.target.value)}
+          placeholder="光影世界"
+        />
+        <p className="text-xs text-gray-400 -mt-2">
+          站点名称用于页脚或品牌展示，例如：光影世界
+        </p>
         <div className="grid grid-cols-2 gap-3">
-          <Input label="新郎" value={form.groom_name || ''} onChange={(e) => update('groom_name', e.target.value)} />
-          <Input label="新娘" value={form.bride_name || ''} onChange={(e) => update('bride_name', e.target.value)} />
+          <Input label="新郎姓名" value={form.groom_name || ''} onChange={(e) => update('groom_name', e.target.value)} />
+          <Input label="新娘姓名" value={form.bride_name || ''} onChange={(e) => update('bride_name', e.target.value)} />
         </div>
+        <Input
+          label="新人展示名"
+          value={form.couple_display_name || ''}
+          onChange={(e) => update('couple_display_name', e.target.value)}
+          placeholder="张三 & 李四"
+        />
+        <p className="text-xs text-gray-400 -mt-2">
+          新人展示名用于首页主标题，留空则自动使用「新郎 & 新娘」
+        </p>
         <Input
           label="婚礼日期时间"
           type="datetime-local"
@@ -54,8 +71,14 @@ export function ConfigEditor() {
           onChange={(e) => update('wedding_date', e.target.value ? new Date(e.target.value).toISOString() : '')}
         />
         <Input label="酒店名称" value={form.venue_name || ''} onChange={(e) => update('venue_name', e.target.value)} />
+        <Input label="宴会厅" value={form.venue_hall || ''} onChange={(e) => update('venue_hall', e.target.value)} placeholder="三层国际宴会厅" />
         <Input label="详细地址" value={form.venue_address || ''} onChange={(e) => update('venue_address', e.target.value)} />
-        <Input label="首页背景图 URL" value={form.hero_image_url || ''} onChange={(e) => update('hero_image_url', e.target.value)} />
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="签到时间" value={form.check_in_time || ''} onChange={(e) => update('check_in_time', e.target.value)} placeholder="10:30" />
+          <Input label="仪式时间" value={form.ceremony_time || ''} onChange={(e) => update('ceremony_time', e.target.value)} placeholder="11:18" />
+        </div>
+        <Input label="停车信息" value={form.parking_info || ''} onChange={(e) => update('parking_info', e.target.value)} placeholder="酒店地下停车场，可凭车牌免费停车" />
+        <Input label="首页背景图" value={form.hero_image_url || ''} onChange={(e) => update('hero_image_url', e.target.value)} />
         <Input label="MV 链接" value={form.mv_url || ''} onChange={(e) => update('mv_url', e.target.value)} placeholder="bilibili / 腾讯视频 / mp4 地址" />
         <Input label="MV 封面 URL" value={form.mv_cover_url || ''} onChange={(e) => update('mv_cover_url', e.target.value)} />
         <Input label="照片直播链接" value={form.photo_live_url || ''} onChange={(e) => update('photo_live_url', e.target.value)} />

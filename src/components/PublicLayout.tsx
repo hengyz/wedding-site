@@ -11,24 +11,22 @@ export function PublicLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-50 via-blush-100/30 to-cream-100">
+    <div className="min-h-screen" style={{ background: 'var(--color-bg, #fff8f5)' }}>
       <main>
         <Outlet />
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-cream-200 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-lg justify-around py-2">
+      <nav className="home-bottom-nav">
+        <div className="home-bottom-nav-inner">
           {navItems.map((item) => {
             const active = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 text-xs transition ${
-                  active ? 'text-champagne-600 font-medium' : 'text-gray-500'
-                }`}
+                className={`home-bottom-nav-item ${active ? 'home-bottom-nav-item-active' : ''}`}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className="home-bottom-nav-icon">{item.icon}</span>
                 {item.label}
               </Link>
             );

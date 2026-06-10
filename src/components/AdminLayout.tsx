@@ -8,6 +8,7 @@ const adminNav = [
   { path: '/admin/schedules', label: '流程' },
   { path: '/admin/photos', label: '相册' },
   { path: '/admin/blessings', label: '祝福' },
+  { path: '/admin/rsvp', label: '宾客回执' },
 ];
 
 export function AdminLayout() {
@@ -54,7 +55,7 @@ export function AdminLayout() {
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-lg px-4 py-4 pb-8">
+      <main className="mx-auto max-w-lg px-4 py-4 pb-8 md:max-w-5xl">
         <Outlet />
       </main>
     </div>

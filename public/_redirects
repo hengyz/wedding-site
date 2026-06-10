@@ -1,1 +1,3 @@
 /*    /index.html   200
+/gy-admin    /admin    301
+/gy-admin/*  /admin/:splat  301

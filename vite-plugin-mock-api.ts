@@ -5,9 +5,14 @@ const seedConfig = {
   couple_name: '光影世界',
   groom_name: '新郎',
   bride_name: '新娘',
+  couple_display_name: '新郎 & 新娘',
   wedding_date: '2026-10-01T04:00:00.000Z',
   venue_name: '幸福大酒店',
   venue_address: '北京市朝阳区幸福路 88 号',
+  venue_hall: '三层国际宴会厅',
+  check_in_time: '10:30',
+  ceremony_time: '11:18',
+  parking_info: '酒店地下停车场，可凭车牌免费停车',
   hero_image_url:
     'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
   mv_url: '',
@@ -63,6 +68,40 @@ const seedPhotos = [
 let blessings = [
   { id: 1, name: '张三', content: '祝你们百年好合，永结同心！', status: 'approved', created_at: new Date().toISOString() },
   { id: 2, name: '李四', content: '新婚快乐，早生贵子！', status: 'approved', created_at: new Date().toISOString() },
+];
+
+type MockRsvp = {
+  id: string;
+  name: string;
+  phone: string | null;
+  attendance: 'yes' | 'no' | 'maybe';
+  adult_count: number;
+  child_count: number;
+  arrival_time: string | null;
+  departure_time: string | null;
+  transport_type: string | null;
+  pickup_location: string | null;
+  remark: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+let rsvpResponses: MockRsvp[] = [
+  {
+    id: 'mock-1',
+    name: '王五',
+    phone: '13800138000',
+    attendance: 'yes',
+    adult_count: 2,
+    child_count: 1,
+    arrival_time: '2026-10-06T10:30',
+    departure_time: null,
+    transport_type: 'need_pickup',
+    pickup_location: '高铁站',
+    remark: '有一位老人',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
 let nextBlessingId = 3;
 let nextScheduleId = 6;
@@ -133,6 +172,34 @@ export function mockApiPlugin(): Plugin {
               });
               return;
             }
+          }
+
+          if (path === '/api/rsvp' && method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => { body += chunk; });
+            req.on('end', () => {
+              const data = JSON.parse(body || '{}');
+              const now = new Date().toISOString();
+              const showDetails = data.attendance === 'yes' || data.attendance === 'maybe';
+              const item: MockRsvp = {
+                id: crypto.randomUUID(),
+                name: data.name,
+                phone: data.phone || null,
+                attendance: data.attendance,
+                adult_count: showDetails ? (data.adultCount ?? 1) : 0,
+                child_count: showDetails ? (data.childCount ?? 0) : 0,
+                arrival_time: showDetails ? (data.arrivalTime || null) : null,
+                departure_time: showDetails ? (data.departureTime || null) : null,
+                transport_type: showDetails ? (data.transportType || null) : null,
+                pickup_location: data.pickupLocation || null,
+                remark: data.remark || null,
+                created_at: now,
+                updated_at: now,
+              };
+              rsvpResponses.unshift(item);
+              send({ id: item.id, message: '感谢您的回执，我们已收到您的信息。' }, 201);
+            });
+            return;
           }
 
           if (path === '/api/admin/login' && method === 'POST') {
@@ -272,6 +339,18 @@ export function mockApiPlugin(): Plugin {
               send(item || {});
             });
             return;
+          }
+
+          if (path === '/api/admin/rsvp' && method === 'GET') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            return send(rsvpResponses);
+          }
+
+          const rsvpMatch = path.match(/^\/api\/admin\/rsvp\/([^/]+)$/);
+          if (rsvpMatch && isAdmin && method === 'DELETE') {
+            const id = rsvpMatch[1];
+            rsvpResponses = rsvpResponses.filter((r) => r.id !== id);
+            return send({ success: true });
           }
 
           send({ error: 'Not found' }, 404);

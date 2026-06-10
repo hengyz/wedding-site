@@ -1,0 +1,20 @@
+import type { Env } from '../../types';
+import { isAuthError, requireAuth, getJwtSecret } from '../../utils/auth';
+import { error, handleOptions, json } from '../../utils/response';
+
+export const onRequest: PagesFunction<Env> = async (context) => {
+  const { request, env } = context;
+  if (request.method === 'OPTIONS') return handleOptions();
+
+  const jwtSecret = getJwtSecret(env);
+  const auth = await requireAuth(request, jwtSecret);
+  if (isAuthError(auth)) return auth;
+
+  if (request.method !== 'GET') return error('Method not allowed', 405);
+
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM rsvp_responses ORDER BY created_at DESC'
+  ).all();
+
+  return json(results);
+};

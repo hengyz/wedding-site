@@ -46,7 +46,8 @@ export function AdminDashboard() {
   return (
     <div className="space-y-4">
       <Card>
-        <h2 className="font-medium mb-2">{config.couple_name}</h2>
+        <h2 className="font-medium mb-2">{config.couple_display_name || `${config.groom_name} & ${config.bride_name}`}</h2>
+        <p className="text-xs text-gray-400">{config.couple_name}</p>
         <p className="text-sm text-gray-500">{formatWeddingDate(config.wedding_date)}</p>
         <p className="text-sm text-gray-500 mt-1">{config.venue_name}</p>
         <p className="mt-2 text-xs text-champagne-600">
@@ -94,6 +95,12 @@ export function AdminDashboard() {
           <Card className="text-center hover:border-champagne-400 transition cursor-pointer">
             <span className="text-2xl">💌</span>
             <p className="text-sm mt-1">祝福审核</p>
+          </Card>
+        </Link>
+        <Link to="/admin/rsvp">
+          <Card className="text-center hover:border-champagne-400 transition cursor-pointer">
+            <span className="text-2xl">📋</span>
+            <p className="text-sm mt-1">宾客回执</p>
           </Card>
         </Link>
       </div>

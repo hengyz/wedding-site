@@ -11,9 +11,14 @@ export interface SiteConfig {
   couple_name: string;
   groom_name: string;
   bride_name: string;
+  couple_display_name: string;
   wedding_date: string;
   venue_name: string;
   venue_address: string;
+  venue_hall: string;
+  check_in_time: string;
+  ceremony_time: string;
+  parking_info: string;
   hero_image_url: string;
   mv_url: string;
   mv_cover_url: string;
@@ -57,6 +62,24 @@ export interface Blessing {
   ip: string;
   user_agent: string;
   created_at: string;
+}
+
+export interface RsvpResponse {
+  id: string;
+  name: string;
+  phone: string | null;
+  attendance: 'yes' | 'no' | 'maybe';
+  adult_count: number;
+  child_count: number;
+  arrival_time: string | null;
+  departure_time: string | null;
+  transport_type: string | null;
+  pickup_location: string | null;
+  remark: string | null;
+  ip_hash: string;
+  user_agent: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface JWTPayload {

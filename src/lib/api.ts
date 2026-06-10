@@ -2,9 +2,14 @@ export interface SiteConfig {
   couple_name: string;
   groom_name: string;
   bride_name: string;
+  couple_display_name?: string;
   wedding_date: string;
   venue_name: string;
   venue_address: string;
+  venue_hall?: string;
+  check_in_time?: string;
+  ceremony_time?: string;
+  parking_info?: string;
   hero_image_url: string;
   mv_url: string;
   mv_cover_url: string;
@@ -44,7 +49,15 @@ export interface Blessing {
   created_at: string;
 }
 
+export type {
+  RsvpResponse,
+  RsvpSubmit,
+  RsvpAttendance,
+  RsvpTransportType,
+} from './rsvp';
+
 import { clearToken } from './auth';
+import type { RsvpResponse, RsvpSubmit } from './rsvp';
 
 export class ApiError extends Error {
   constructor(
@@ -105,6 +118,12 @@ export const api = {
 
   submitBlessing: (data: { name: string; content: string }) =>
     request<{ id: number; message: string }>('/api/blessings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  submitRsvp: (data: RsvpSubmit) =>
+    request<{ id: string; message: string }>('/api/rsvp', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -211,6 +230,15 @@ export const api = {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ status }),
+    }),
+
+  adminGetRsvp: () =>
+    request<RsvpResponse[]>('/api/admin/rsvp', { headers: authHeaders() }),
+
+  adminDeleteRsvp: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/rsvp/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
     }),
 };
 
