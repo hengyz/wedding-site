@@ -62,12 +62,43 @@ function resolveAbsoluteUrl(url: string, origin: string): string {
   return trimmed;
 }
 
+/** Standard Open Graph image ratio (1.91:1). */
+const DEFAULT_OG_WIDTH = 1200;
+const DEFAULT_OG_HEIGHT = 630;
+
+function guessImageDimensions(imageUrl: string): { width: number; height: number } {
+  try {
+    const url = new URL(imageUrl);
+    const w = url.searchParams.get('w') || url.searchParams.get('width');
+    const h = url.searchParams.get('h') || url.searchParams.get('height');
+    const width = w ? parseInt(w, 10) : DEFAULT_OG_WIDTH;
+    const height = h
+      ? parseInt(h, 10)
+      : w
+        ? Math.round(parseInt(w, 10) / 1.91)
+        : DEFAULT_OG_HEIGHT;
+    if (width > 0 && height > 0) return { width, height };
+  } catch {
+    // ignore invalid URL
+  }
+  return { width: DEFAULT_OG_WIDTH, height: DEFAULT_OG_HEIGHT };
+}
+
+function getTwitterSite(siteName: string): string {
+  const slug = siteName.replace(/[^a-zA-Z0-9]/g, '');
+  return slug ? `@${slug}` : '@guangyingworld';
+}
+
 export interface OgMeta {
   title: string;
   description: string;
   image: string;
+  imageWidth: number;
+  imageHeight: number;
+  imageAlt: string;
   url: string;
   siteName: string;
+  twitterSite: string;
 }
 
 export function buildOgMeta(config: SiteConfig, pageUrl: string, origin: string): OgMeta {
@@ -75,15 +106,23 @@ export function buildOgMeta(config: SiteConfig, pageUrl: string, origin: string)
   const date = formatWeddingDate(config.wedding_date);
   const invite = getInviteLine(config.mode);
 
+  const siteName = config.couple_name?.trim() || '光影世界';
+  const image = resolveAbsoluteUrl(
+    config.hero_image_url || config.mv_cover_url || '',
+    origin
+  );
+  const { width, height } = guessImageDimensions(image);
+
   return {
     title: `${couple} 的婚礼`,
     description: date ? `${date} · ${invite}` : invite,
-    image: resolveAbsoluteUrl(
-      config.hero_image_url || config.mv_cover_url || '',
-      origin
-    ),
+    image,
+    imageWidth: width,
+    imageHeight: height,
+    imageAlt: `${couple} 婚礼邀请封面`,
     url: pageUrl,
-    siteName: config.couple_name?.trim() || '光影世界',
+    siteName,
+    twitterSite: getTwitterSite(siteName),
   };
 }
 
@@ -98,14 +137,19 @@ function renderMetaTags(meta: OgMeta): string {
     `<meta itemprop="name" content="${escapeHtml(meta.title)}" />`,
     `<meta itemprop="description" content="${escapeHtml(meta.description)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:site" content="${escapeHtml(meta.twitterSite)}" />`,
     `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`,
   ];
 
   if (meta.image) {
     tags.push(`<meta property="og:image" content="${escapeHtml(meta.image)}" />`);
+    tags.push(`<meta property="og:image:width" content="${meta.imageWidth}" />`);
+    tags.push(`<meta property="og:image:height" content="${meta.imageHeight}" />`);
+    tags.push(`<meta property="og:image:alt" content="${escapeHtml(meta.imageAlt)}" />`);
     tags.push(`<meta itemprop="image" content="${escapeHtml(meta.image)}" />`);
     tags.push(`<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`);
+    tags.push(`<meta name="twitter:image:alt" content="${escapeHtml(meta.imageAlt)}" />`);
   }
 
   return tags.join('\n    ');
