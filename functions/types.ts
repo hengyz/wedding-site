@@ -1,7 +1,6 @@
 export interface Env {
   DB: D1Database;
   PHOTOS?: R2Bucket;
-  ASSETS: Fetcher;
   ADMIN_PASSWORD: string;
   JWT_SECRET: string;
   R2_PUBLIC_URL?: string;
