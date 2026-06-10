@@ -126,7 +126,9 @@ export function PhotoManager() {
         >
           {uploading ? '上传中...' : '选择图片上传'}
         </Button>
-        <p className="text-xs text-gray-400">支持 JPG/PNG/WebP/GIF，单张最大 10MB，可多选</p>
+        <p className="text-xs text-gray-400">
+          支持 JPG/PNG/WebP/GIF，单张最大 10MB，可多选。文件名按拍摄时间命名（如 20250609143025.jpg）
+        </p>
         {uploadMsg && (
           <p className={`text-sm ${uploadMsg.includes('成功') ? 'text-green-600' : 'text-red-500'}`}>
             {uploadMsg}

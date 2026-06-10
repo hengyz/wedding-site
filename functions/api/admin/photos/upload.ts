@@ -1,7 +1,11 @@
 import type { Env } from '../../../types';
 import { isAuthError, requireAuth, getJwtSecret } from '../../../utils/auth';
 import { requireDb, isDbError } from '../../../utils/db';
-import { buildR2Key } from '../../../utils/r2';
+import {
+  buildUniquePhotoKey,
+  formatPhotoFilename,
+  resolveCaptureDate,
+} from '../../../utils/photo-date';
 import { error, handleOptions, json } from '../../../utils/response';
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -69,11 +73,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const category = (formData.get('category')?.toString() || 'pre_wedding').trim();
-  const title = (formData.get('title')?.toString() || file.name.replace(/\.[^.]+$/, '')).trim();
   const ext = extFromType(file.type);
-  const key = buildR2Key(`${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`);
+  const capturedAtHint = formData.get('capturedAt')?.toString() || null;
 
-  await env.PHOTOS.put(key, file.stream(), {
+  const buffer = await file.arrayBuffer();
+  const captureDate = resolveCaptureDate(buffer, file.type, capturedAtHint);
+  const baseName = formatPhotoFilename(captureDate);
+  const key = await buildUniquePhotoKey(env, baseName, ext);
+
+  const defaultTitle = baseName.replace(
+    /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+    '$1-$2-$3 $4:$5:$6'
+  );
+  const title = (formData.get('title')?.toString() || defaultTitle).trim();
+
+  await env.PHOTOS.put(key, buffer, {
     httpMetadata: { contentType: file.type },
   });
 

@@ -176,12 +176,13 @@ export const api = {
 
   adminUploadPhoto: async (
     file: File,
-    data: { category?: string; title?: string } = {}
+    data: { category?: string; title?: string; capturedAt?: string } = {}
   ) => {
     const form = new FormData();
     form.append('file', file);
     if (data.category) form.append('category', data.category);
     if (data.title) form.append('title', data.title);
+    form.append('capturedAt', data.capturedAt ?? new Date(file.lastModified).toISOString());
 
     const res = await fetch('/api/admin/photos/upload', {
       method: 'POST',
