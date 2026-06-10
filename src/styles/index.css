@@ -70,7 +70,6 @@
     @apply p-4 transition-all duration-500 ease-out
            hover:-translate-y-1 hover:border-white/80
            hover:bg-white/45 hover:shadow-[0_20px_40px_rgba(196,165,116,0.2)];
-    animation: blessing-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .blessing-glass-shine {
@@ -83,16 +82,26 @@
     );
   }
 
-  .blessing-float-wrapper {
-    animation: blessing-float 7s ease-in-out infinite;
-  }
-
   .blessing-masonry {
-    column-count: 2;
-    column-gap: 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   @media (min-width: 640px) {
+    .blessing-masonry {
+      display: block;
+      column-count: 2;
+      column-gap: 0.875rem;
+    }
+
+    .blessing-masonry .blessing-glass-card {
+      break-inside: avoid;
+      margin-bottom: 0.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
     .blessing-masonry {
       column-count: 3;
       column-gap: 1rem;
@@ -163,14 +172,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .blessing-float-wrapper,
   .blessing-blob,
   .blessing-glass-card {
     animation: none !important;
-  }
-
-  .blessing-glass-card {
-    opacity: 1;
-    transform: none;
   }
 }

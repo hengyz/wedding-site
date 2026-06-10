@@ -56,7 +56,7 @@ export function BlessingPage() {
         <div className="blessing-blob blessing-blob-3" />
       </div>
 
-      <div className="blessing-container relative z-10 mx-auto max-w-3xl px-4 pb-24 pt-4">
+      <div className="blessing-container relative z-10 mx-auto max-w-3xl px-4 pb-32 pt-4">
         <header className="mb-8 text-center">
           <p className="mb-2 text-xs font-medium uppercase tracking-[0.35em] text-champagne-500/80">
             Blessings

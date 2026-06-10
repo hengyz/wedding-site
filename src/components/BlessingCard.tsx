@@ -25,21 +25,12 @@ interface BlessingCardProps {
 export function BlessingCard({ blessing, index }: BlessingCardProps) {
   const gradient = AVATAR_GRADIENTS[index % AVATAR_GRADIENTS.length];
   const accent = ACCENT_DOTS[index % ACCENT_DOTS.length];
-  const floatDelay = `${(index % 6) * 0.9}s`;
-  const enterDelay = `${Math.min(index * 0.08, 0.8)}s`;
 
   return (
-    <div
-      className="blessing-float-wrapper mb-3.5 break-inside-avoid"
-      style={{ animationDelay: floatDelay }}
-    >
-      <article
-        className="blessing-glass-card group"
-        style={{ animationDelay: enterDelay }}
-      >
-        <div className="blessing-glass-shine" aria-hidden />
+    <article className="blessing-glass-card group">
+      <div className="blessing-glass-shine" aria-hidden />
 
-        <div className="relative z-[1] flex items-start gap-3">
+      <div className="relative z-[1] flex items-start gap-3">
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-sm font-semibold text-champagne-600 shadow-sm ring-1 ring-white/60 transition-transform duration-500 group-hover:scale-105`}
           >
@@ -65,7 +56,6 @@ export function BlessingCard({ blessing, index }: BlessingCardProps) {
             </p>
           </div>
         </div>
-      </article>
-    </div>
+    </article>
   );
 }

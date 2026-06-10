@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { api, type SiteConfig } from '../lib/api';
 import { formatWeddingDate, getCountdown, pad } from '../lib/date';
 import {
-  getBrandTagline,
   getCoupleDisplayName,
   getInviteLine,
 } from '../lib/wedding-display';
@@ -58,7 +57,6 @@ export function Home() {
   }
 
   const coupleTitle = getCoupleDisplayName(config);
-  const brandLine = getBrandTagline(config);
   const inviteLine = getInviteLine(config.mode);
 
   return (
@@ -81,7 +79,6 @@ export function Home() {
           <p className="home-hero-invite">{inviteLine}</p>
           <h1 className="home-hero-title">{coupleTitle}</h1>
           <p className="home-hero-date">{formatWeddingDate(config.wedding_date)}</p>
-          <p className="home-hero-brand">{brandLine}</p>
         </div>
 
         <div className="home-hero-curve" aria-hidden />
