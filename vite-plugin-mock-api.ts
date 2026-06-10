@@ -229,6 +229,16 @@ export function mockApiPlugin(): Plugin {
             }
           }
 
+          if (path === '/api/admin/config/hero-upload' && method === 'POST') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            const url =
+              'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80';
+            seedConfig.hero_image_url = url;
+            seedConfig.updated_at = new Date().toISOString();
+            send({ url, hero_image_url: url, config: seedConfig }, 201);
+            return;
+          }
+
           if (path === '/api/admin/schedules') {
             if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
             if (method === 'GET') return send(seedSchedules);

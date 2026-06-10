@@ -143,6 +143,34 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  adminUploadHeroImage: async (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('capturedAt', new Date(file.lastModified).toISOString());
+
+    const res = await fetch('/api/admin/config/hero-upload', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const err = new ApiError(
+        (body as { error?: string }).error || res.statusText,
+        res.status
+      );
+      if (res.status === 401) clearToken();
+      throw err;
+    }
+
+    return res.json() as Promise<{
+      url: string;
+      hero_image_url: string;
+      config: SiteConfig & { id: number; updated_at: string };
+    }>;
+  },
+
   adminGetSchedules: () =>
     request<Schedule[]>('/api/admin/schedules', { headers: authHeaders() }),
 

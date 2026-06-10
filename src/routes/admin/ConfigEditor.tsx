@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { api, SITE_MODES, type SiteConfig } from '../../lib/api';
+import { useEffect, useRef, useState } from 'react';
+import { api, ApiError, SITE_MODES, type SiteConfig } from '../../lib/api';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Textarea } from '../../components/Textarea';
@@ -7,9 +7,11 @@ import { Button } from '../../components/Button';
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../../lib/date';
 
 export function ConfigEditor() {
+  const heroFileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<Partial<SiteConfig>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [heroUploading, setHeroUploading] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -21,6 +23,24 @@ export function ConfigEditor() {
 
   const update = (key: keyof SiteConfig, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleHeroUpload = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+
+    setMessage('');
+    setHeroUploading(true);
+    try {
+      const result = await api.adminUploadHeroImage(file);
+      setForm((prev) => ({ ...prev, hero_image_url: result.hero_image_url }));
+      setMessage('背景图上传成功');
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : '背景图上传失败');
+    } finally {
+      setHeroUploading(false);
+      if (heroFileRef.current) heroFileRef.current.value = '';
+    }
   };
 
   const handleSave = async () => {
@@ -74,7 +94,45 @@ export function ConfigEditor() {
         <p className="text-xs text-gray-400 -mt-2">按北京时间（东八区）填写，例如 2026-10-01 12:00</p>
         <Input label="酒店名称" value={form.venue_name || ''} onChange={(e) => update('venue_name', e.target.value)} />
         <Input label="详细地址" value={form.venue_address || ''} onChange={(e) => update('venue_address', e.target.value)} />
-        <Input label="首页背景图" value={form.hero_image_url || ''} onChange={(e) => update('hero_image_url', e.target.value)} />
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-gray-700">首页背景图</p>
+          {form.hero_image_url ? (
+            <div className="overflow-hidden rounded-xl border border-cream-200 bg-cream-50">
+              <img
+                src={form.hero_image_url}
+                alt="首页背景预览"
+                className="w-full max-h-48 object-cover"
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">尚未设置背景图</p>
+          )}
+          <input
+            ref={heroFileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={(e) => handleHeroUpload(e.target.files)}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            fullWidth
+            disabled={heroUploading}
+            onClick={() => heroFileRef.current?.click()}
+          >
+            {heroUploading ? '上传中...' : '上传图片到 R2（推荐）'}
+          </Button>
+          <p className="text-xs text-gray-400">
+            上传后自动获得 HTTPS 地址，用于首页背景和微信分享封面。支持 JPG、PNG、WebP、GIF，最大 10MB。
+          </p>
+          <Input
+            label="或手动填写图片 URL"
+            value={form.hero_image_url || ''}
+            onChange={(e) => update('hero_image_url', e.target.value)}
+            placeholder="https://photos.guangying.world/wedding/hero/..."
+          />
+        </div>
         <Input label="MV 链接" value={form.mv_url || ''} onChange={(e) => update('mv_url', e.target.value)} placeholder="bilibili / 腾讯视频 / mp4 地址" />
         <Input label="MV 封面 URL" value={form.mv_cover_url || ''} onChange={(e) => update('mv_cover_url', e.target.value)} />
         <Input label="照片直播链接" value={form.photo_live_url || ''} onChange={(e) => update('photo_live_url', e.target.value)} />
