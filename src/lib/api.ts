@@ -6,10 +6,6 @@ export interface SiteConfig {
   wedding_date: string;
   venue_name: string;
   venue_address: string;
-  venue_hall?: string;
-  check_in_time?: string;
-  ceremony_time?: string;
-  parking_info?: string;
   hero_image_url: string;
   mv_url: string;
   mv_cover_url: string;

@@ -6,13 +6,9 @@ const seedConfig = {
   groom_name: '新郎',
   bride_name: '新娘',
   couple_display_name: '新郎 & 新娘',
-  wedding_date: '2026-10-01T04:00:00.000Z',
+  wedding_date: '2026-10-01T04:00:00.000Z', // 北京时间 2026-10-01 12:00
   venue_name: '幸福大酒店',
   venue_address: '北京市朝阳区幸福路 88 号',
-  venue_hall: '三层国际宴会厅',
-  check_in_time: '10:30',
-  ceremony_time: '11:18',
-  parking_info: '酒店地下停车场，可凭车牌免费停车',
   hero_image_url:
     'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
   mv_url: '',

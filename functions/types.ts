@@ -1,6 +1,7 @@
 export interface Env {
   DB: D1Database;
   PHOTOS?: R2Bucket;
+  ASSETS: Fetcher;
   ADMIN_PASSWORD: string;
   JWT_SECRET: string;
   R2_PUBLIC_URL?: string;
@@ -15,10 +16,6 @@ export interface SiteConfig {
   wedding_date: string;
   venue_name: string;
   venue_address: string;
-  venue_hall: string;
-  check_in_time: string;
-  ceremony_time: string;
-  parking_info: string;
   hero_image_url: string;
   mv_url: string;
   mv_cover_url: string;

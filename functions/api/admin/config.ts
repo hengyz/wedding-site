@@ -29,7 +29,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const allowed = [
       'couple_name', 'groom_name', 'bride_name', 'couple_display_name', 'wedding_date',
-      'venue_name', 'venue_address', 'venue_hall', 'check_in_time', 'ceremony_time', 'parking_info',
+      'venue_name', 'venue_address',
       'hero_image_url',
       'mv_url', 'mv_cover_url', 'photo_live_url',
       'amap_url', 'baidu_map_url', 'tencent_map_url',

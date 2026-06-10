@@ -4,6 +4,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Textarea } from '../../components/Textarea';
 import { Button } from '../../components/Button';
+import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../../lib/date';
 
 export function ConfigEditor() {
   const [form, setForm] = useState<Partial<SiteConfig>>({});
@@ -67,17 +68,12 @@ export function ConfigEditor() {
         <Input
           label="婚礼日期时间"
           type="datetime-local"
-          value={form.wedding_date?.slice(0, 16) || ''}
-          onChange={(e) => update('wedding_date', e.target.value ? new Date(e.target.value).toISOString() : '')}
+          value={toDatetimeLocalValue(form.wedding_date || '')}
+          onChange={(e) => update('wedding_date', fromDatetimeLocalValue(e.target.value))}
         />
+        <p className="text-xs text-gray-400 -mt-2">按北京时间（东八区）填写，例如 2026-10-01 12:00</p>
         <Input label="酒店名称" value={form.venue_name || ''} onChange={(e) => update('venue_name', e.target.value)} />
-        <Input label="宴会厅" value={form.venue_hall || ''} onChange={(e) => update('venue_hall', e.target.value)} placeholder="三层国际宴会厅" />
         <Input label="详细地址" value={form.venue_address || ''} onChange={(e) => update('venue_address', e.target.value)} />
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="签到时间" value={form.check_in_time || ''} onChange={(e) => update('check_in_time', e.target.value)} placeholder="10:30" />
-          <Input label="仪式时间" value={form.ceremony_time || ''} onChange={(e) => update('ceremony_time', e.target.value)} placeholder="11:18" />
-        </div>
-        <Input label="停车信息" value={form.parking_info || ''} onChange={(e) => update('parking_info', e.target.value)} placeholder="酒店地下停车场，可凭车牌免费停车" />
         <Input label="首页背景图" value={form.hero_image_url || ''} onChange={(e) => update('hero_image_url', e.target.value)} />
         <Input label="MV 链接" value={form.mv_url || ''} onChange={(e) => update('mv_url', e.target.value)} placeholder="bilibili / 腾讯视频 / mp4 地址" />
         <Input label="MV 封面 URL" value={form.mv_cover_url || ''} onChange={(e) => update('mv_cover_url', e.target.value)} />
