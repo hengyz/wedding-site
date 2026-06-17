@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, type SiteConfig } from '../lib/api';
+import { api } from '../lib/api';
 import { formatWeddingDate, getCountdown, pad } from '../lib/date';
 import {
   getCoupleDisplayName,
   getInviteLine,
 } from '../lib/wedding-display';
+import { usePageLoad } from '../hooks/usePageLoad';
+import { PageError, PageLoading } from '../components/PageState';
 
 const features = [
   { path: '/wedding', label: '婚礼信息', icon: '💒', desc: '了解婚礼详情' },
@@ -17,18 +19,8 @@ const features = [
 ];
 
 export function Home() {
-  const [config, setConfig] = useState<SiteConfig | null>(null);
+  const { data: config, loading, error, retry } = usePageLoad(() => api.getConfig());
   const [countdown, setCountdown] = useState(getCountdown(''));
-  const [loadError, setLoadError] = useState('');
-
-  useEffect(() => {
-    api.getConfig()
-      .then(setConfig)
-      .catch((err) => {
-        console.error(err);
-        setLoadError('加载失败，请检查 API 和数据库配置');
-      });
-  }, []);
 
   useEffect(() => {
     if (!config?.wedding_date) return;
@@ -39,20 +31,21 @@ export function Home() {
     return () => clearInterval(timer);
   }, [config?.wedding_date]);
 
-  if (loadError) {
+  if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-6 text-center">
-        <div className="text-red-500">{loadError}</div>
-        <p className="text-sm text-gray-500">请确认 D1 已绑定且已执行 migration</p>
-      </div>
+      <PageError
+        message={error}
+        onRetry={retry}
+        className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center"
+      />
     );
   }
 
-  if (!config) {
+  if (loading || !config) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-champagne-500">加载中...</div>
-      </div>
+      <PageLoading
+        className="flex min-h-screen items-center justify-center"
+      />
     );
   }
 

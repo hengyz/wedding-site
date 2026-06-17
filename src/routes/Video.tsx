@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { api, type SiteConfig } from '../lib/api';
+import { api } from '../lib/api';
 import { Card } from '../components/Card';
+import { usePageLoad } from '../hooks/usePageLoad';
+import { PageError, PageLoading } from '../components/PageState';
 
 function getEmbedUrl(url: string): { type: 'iframe' | 'video'; src: string } | null {
   if (!url) return null;
@@ -33,18 +34,14 @@ function getEmbedUrl(url: string): { type: 'iframe' | 'video'; src: string } | n
 }
 
 export function Video() {
-  const [config, setConfig] = useState<SiteConfig | null>(null);
+  const { data: config, loading, error, retry } = usePageLoad(() => api.getConfig());
 
-  useEffect(() => {
-    api.getConfig().then(setConfig).catch(console.error);
-  }, []);
+  if (error) {
+    return <PageError message={error} onRetry={retry} />;
+  }
 
-  if (!config) {
-    return (
-      <div className="page-container flex items-center justify-center min-h-[50vh]">
-        <div className="text-champagne-500">加载中...</div>
-      </div>
-    );
+  if (loading || !config) {
+    return <PageLoading />;
   }
 
   const embed = config.mv_url ? getEmbedUrl(config.mv_url) : null;

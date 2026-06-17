@@ -1,28 +1,26 @@
-import { useEffect, useState } from 'react';
-import { api, type SiteConfig, type Schedule } from '../lib/api';
+import { api } from '../lib/api';
 import { formatWeddingDate, formatTime } from '../lib/date';
 import { Card } from '../components/Card';
+import { usePageLoad } from '../hooks/usePageLoad';
+import { PageError, PageLoading } from '../components/PageState';
 
 export function Wedding() {
-  const [config, setConfig] = useState<SiteConfig | null>(null);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const { data, loading, error, retry } = usePageLoad(() =>
+    Promise.all([api.getConfig(), api.getSchedules()]).then(([config, schedules]) => ({
+      config,
+      schedules,
+    }))
+  );
 
-  useEffect(() => {
-    Promise.all([api.getConfig(), api.getSchedules()])
-      .then(([cfg, sch]) => {
-        setConfig(cfg);
-        setSchedules(sch);
-      })
-      .catch(console.error);
-  }, []);
-
-  if (!config) {
-    return (
-      <div className="page-container flex items-center justify-center min-h-[50vh]">
-        <div className="text-champagne-500">加载中...</div>
-      </div>
-    );
+  if (error) {
+    return <PageError message={error} onRetry={retry} />;
   }
+
+  if (loading || !data) {
+    return <PageLoading />;
+  }
+
+  const { config, schedules } = data;
 
   return (
     <div className="page-container">

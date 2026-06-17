@@ -1,4 +1,5 @@
 import type { Env, SiteConfig } from '../types';
+import { resolveEffectiveMode } from './mode';
 import { error } from './response';
 
 export function requireDb(env: Env): D1Database | Response {
@@ -39,6 +40,6 @@ export function publicConfig(config: SiteConfig) {
     tencent_map_url: config.tencent_map_url,
     dress_code: config.dress_code,
     notes: config.notes,
-    mode: config.mode,
+    mode: resolveEffectiveMode(config.wedding_date),
   };
 }

@@ -1,21 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api, PHOTO_CATEGORIES, type Photo } from '../lib/api';
 import { ImagePreview } from '../components/ImagePreview';
+import { usePageLoad } from '../hooks/usePageLoad';
+import { PageEmpty, PageError, PageLoading } from '../components/PageState';
 
 export function Gallery() {
-  const [photos, setPhotos] = useState<Photo[]>([]);
   const [category, setCategory] = useState<string>('');
   const [preview, setPreview] = useState<Photo | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    api
-      .getPhotos(category || undefined)
-      .then(setPhotos)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [category]);
+  const { data: photos, loading, error, retry } = usePageLoad(
+    () => api.getPhotos(category || undefined),
+    [category]
+  );
 
   const categories = ['', ...Object.keys(PHOTO_CATEGORIES)];
 
@@ -39,10 +34,12 @@ export function Gallery() {
         ))}
       </div>
 
-      {loading ? (
-        <div className="text-center text-champagne-500 py-12">加载中...</div>
-      ) : photos.length === 0 ? (
-        <div className="text-center text-gray-400 py-12">暂无照片</div>
+      {error ? (
+        <PageError message={error} onRetry={retry} className="flex flex-col items-center justify-center gap-3 py-12 px-6 text-center" />
+      ) : loading ? (
+        <PageLoading className="text-center text-champagne-500 py-12" label="加载中..." />
+      ) : !photos || photos.length === 0 ? (
+        <PageEmpty message="暂无照片" />
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {photos.map((photo) => (

@@ -1,28 +1,27 @@
-import { useEffect, useState } from 'react';
-import { api, ApiError, type Blessing } from '../lib/api';
+import { useState } from 'react';
+import { api, ApiError } from '../lib/api';
 import { BlessingCard } from '../components/BlessingCard';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Button } from '../components/Button';
+import { usePageLoad } from '../hooks/usePageLoad';
+import { PageError, PageLoading } from '../components/PageState';
 
 const glassInputClass =
   'border-white/50 bg-white/40 backdrop-blur-sm placeholder:text-gray-400/70 focus:border-champagne-400/60 focus:bg-white/55 focus:ring-champagne-400/20';
 
 export function BlessingPage() {
-  const [blessings, setBlessings] = useState<Blessing[]>([]);
+  const {
+    data: blessings,
+    loading: listLoading,
+    error: listError,
+    retry: reloadBlessings,
+  } = usePageLoad(() => api.getBlessings());
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
-  const loadBlessings = () => {
-    api.getBlessings().then(setBlessings).catch(console.error);
-  };
-
-  useEffect(() => {
-    loadBlessings();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +39,7 @@ export function BlessingPage() {
       setMessage(res.message);
       setName('');
       setContent('');
-      loadBlessings();
+      reloadBlessings();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '提交失败');
     } finally {
@@ -119,12 +118,21 @@ export function BlessingPage() {
         <section>
           <div className="mb-6 text-center">
             <h2 className="font-serif text-xl text-champagne-600">大家的祝福</h2>
-            {blessings.length > 0 && (
+            {blessings && blessings.length > 0 && (
               <p className="mt-1 text-xs text-gray-400">{blessings.length} 条温暖心意</p>
             )}
           </div>
 
-          {blessings.length === 0 ? (
+          {listError ? (
+            <PageError
+              message={listError}
+              onRetry={reloadBlessings}
+              className="blessing-glass-panel flex flex-col items-center justify-center gap-3 py-10 px-6 text-center"
+              hint="无法加载祝福列表"
+            />
+          ) : listLoading ? (
+            <PageLoading className="blessing-glass-panel py-14 text-center" label="加载中..." />
+          ) : !blessings || blessings.length === 0 ? (
             <div className="blessing-glass-panel py-14 text-center">
               <div className="blessing-glass-shine" aria-hidden />
               <p className="relative z-[1] text-3xl">💕</p>

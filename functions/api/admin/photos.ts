@@ -1,13 +1,12 @@
 import type { Env } from '../../types';
-import { isAuthError, requireAuth, getJwtSecret } from '../../utils/auth';
+import { isAuthError, requireAdminAuth } from '../../utils/auth';
 import { error, handleOptions, json, parseBody } from '../../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   if (request.method === 'OPTIONS') return handleOptions();
 
-  const jwtSecret = getJwtSecret(env);
-  const auth = await requireAuth(request, jwtSecret);
+  const auth = await requireAdminAuth(request, env);
   if (isAuthError(auth)) return auth;
 
   if (request.method === 'GET') {

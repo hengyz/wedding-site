@@ -1,3 +1,4 @@
+DEV_MODE=true
 ADMIN_PASSWORD=admin123
 JWT_SECRET=dev-secret-change-me-in-production
 # R2 公共访问域名（上传功能必需）

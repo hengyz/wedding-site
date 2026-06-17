@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api, ApiError, SITE_MODES, type SiteConfig } from '../../lib/api';
+import { resolveEffectiveMode } from '../../lib/mode';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Textarea } from '../../components/Textarea';
@@ -141,17 +142,14 @@ export function ConfigEditor() {
         <Input label="腾讯地图链接" value={form.tencent_map_url || ''} onChange={(e) => update('tencent_map_url', e.target.value)} />
         <Textarea label="着装建议" value={form.dress_code || ''} onChange={(e) => update('dress_code', e.target.value)} />
         <Textarea label="注意事项" value={form.notes || ''} onChange={(e) => update('notes', e.target.value)} />
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">网站模式</label>
-          <select
-            value={form.mode || 'before_wedding'}
-            onChange={(e) => update('mode', e.target.value)}
-            className="w-full rounded-xl border border-cream-200 px-4 py-2.5"
-          >
-            {Object.entries(SITE_MODES).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
+        <div className="rounded-xl border border-cream-200 bg-cream-50 px-4 py-3">
+          <p className="text-sm font-medium text-gray-700">网站模式</p>
+          <p className="mt-1 text-sm text-champagne-600">
+            {SITE_MODES[resolveEffectiveMode(form.wedding_date || '')]}
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            根据婚礼日期（北京时间）自动切换：婚礼日前为婚前模式，当天为婚礼当天，之后为婚后模式
+          </p>
         </div>
       </Card>
 

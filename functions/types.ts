@@ -4,6 +4,8 @@ export interface Env {
   ADMIN_PASSWORD: string;
   JWT_SECRET: string;
   R2_PUBLIC_URL?: string;
+  /** Set to "true" in .dev.vars for local development with default credentials */
+  DEV_MODE?: string;
 }
 
 export interface SiteConfig {

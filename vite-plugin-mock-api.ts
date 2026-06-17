@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite';
+import { resolveEffectiveMode } from './src/lib/mode';
 
 const seedConfig = {
   id: 1,
@@ -111,8 +112,11 @@ function json(res: unknown, status = 200) {
 }
 
 function publicConfig() {
-  const { id: _id, updated_at: _u, ...rest } = seedConfig;
-  return rest;
+  const { id: _id, updated_at: _u, mode: _m, ...rest } = seedConfig;
+  return {
+    ...rest,
+    mode: resolveEffectiveMode(seedConfig.wedding_date),
+  };
 }
 
 export function mockApiPlugin(): Plugin {

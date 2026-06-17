@@ -1,4 +1,5 @@
 import type { SiteConfig } from '../types';
+import { resolveEffectiveMode } from './mode';
 
 const WEDDING_TIMEZONE = 'Asia/Shanghai';
 
@@ -104,7 +105,7 @@ export interface OgMeta {
 export function buildOgMeta(config: SiteConfig, pageUrl: string, origin: string): OgMeta {
   const couple = getCoupleDisplayName(config);
   const date = formatWeddingDate(config.wedding_date);
-  const invite = getInviteLine(config.mode);
+  const invite = getInviteLine(resolveEffectiveMode(config.wedding_date));
 
   const siteName = config.couple_name?.trim() || '光影世界';
   const image = resolveAbsoluteUrl(

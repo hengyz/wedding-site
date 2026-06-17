@@ -86,10 +86,14 @@ cp .dev.vars.example .dev.vars
 `.dev.vars` 内容：
 
 ```
+DEV_MODE=true
 ADMIN_PASSWORD=你的管理密码
 JWT_SECRET=随机长字符串
 R2_PUBLIC_URL=https://photos.yourdomain.com
 ```
+
+> 本地开发请设置 `DEV_MODE=true`，可使用默认密码。  
+> **生产环境切勿设置 DEV_MODE**，且必须配置强密码和随机 JWT_SECRET，否则管理后台将拒绝服务。
 
 ### Cloudflare Pages 生产环境
 
@@ -97,9 +101,11 @@ R2_PUBLIC_URL=https://photos.yourdomain.com
 
 | 变量名 | 类型 | 说明 |
 |--------|------|------|
-| `ADMIN_PASSWORD` | Secret | 管理员登录密码 |
-| `JWT_SECRET` | Secret | JWT 签名密钥（随机长字符串） |
+| `ADMIN_PASSWORD` | Secret | 管理员登录密码（不可使用默认值 admin123） |
+| `JWT_SECRET` | Secret | JWT 签名密钥（随机长字符串，不可使用示例值） |
 | `R2_PUBLIC_URL` | Text | R2 公共访问域名（可选） |
+
+> 生产环境不要设置 `DEV_MODE`。
 
 ---
 
