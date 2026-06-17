@@ -9,8 +9,10 @@ const INSECURE_JWT_SECRETS = new Set([
   'dev-secret-change-me-in-production',
 ]);
 
-export function isDevEnvironment(env: { DEV_MODE?: string }): boolean {
-  return env.DEV_MODE === 'true' || env.DEV_MODE === '1';
+export function isDevEnvironment(env: { DEV_MODE?: string; CF_PAGES?: string }): boolean {
+  if (env.DEV_MODE === 'true' || env.DEV_MODE === '1') return true;
+  // Wrangler local dev — not deployed to Cloudflare edge
+  return env.CF_PAGES !== '1';
 }
 
 export function resolveAdminPassword(env: Env): string | null {
@@ -38,8 +40,27 @@ export function resolveJwtSecret(env: Env): string | null {
 /** Returns 503 when production secrets are missing or still at defaults. */
 export function credentialsMisconfigured(env: Env): Response | null {
   if (isDevEnvironment(env)) return null;
-  if (!resolveAdminPassword(env) || !resolveJwtSecret(env)) {
-    return error('服务配置未完成，请联系管理员', 503);
+
+  const passwordOk = !!resolveAdminPassword(env);
+  const secretOk = !!resolveJwtSecret(env);
+
+  if (!passwordOk && !secretOk) {
+    return error(
+      '生产环境请在 Cloudflare Pages 配置 ADMIN_PASSWORD 和 JWT_SECRET',
+      503
+    );
+  }
+  if (!passwordOk) {
+    return error(
+      '生产环境 ADMIN_PASSWORD 未配置或仍为默认值 admin123',
+      503
+    );
+  }
+  if (!secretOk) {
+    return error(
+      '生产环境 JWT_SECRET 未配置或仍为示例值，请改为随机字符串',
+      503
+    );
   }
   return null;
 }

@@ -6,6 +6,8 @@ export interface Env {
   R2_PUBLIC_URL?: string;
   /** Set to "true" in .dev.vars for local development with default credentials */
   DEV_MODE?: string;
+  /** "1" when running on Cloudflare Pages (production/preview) */
+  CF_PAGES?: string;
 }
 
 export interface SiteConfig {

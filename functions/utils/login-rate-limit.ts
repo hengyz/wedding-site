@@ -5,15 +5,20 @@ export async function isLoginRateLimited(
   db: D1Database,
   ip: string
 ): Promise<boolean> {
-  const row = await db.prepare(
-    `SELECT COUNT(*) as c FROM login_attempts
-     WHERE ip = ? AND success = 0
-       AND created_at > datetime('now', '-${WINDOW_MINUTES} minutes')`
-  )
-    .bind(ip)
-    .first<{ c: number }>();
+  try {
+    const row = await db.prepare(
+      `SELECT COUNT(*) as c FROM login_attempts
+       WHERE ip = ? AND success = 0
+         AND created_at > datetime('now', '-${WINDOW_MINUTES} minutes')`
+    )
+      .bind(ip)
+      .first<{ c: number }>();
 
-  return (row?.c ?? 0) >= MAX_ATTEMPTS;
+    return (row?.c ?? 0) >= MAX_ATTEMPTS;
+  } catch {
+    // Table may not exist before migration 0004 is applied
+    return false;
+  }
 }
 
 export async function recordLoginAttempt(
@@ -21,9 +26,13 @@ export async function recordLoginAttempt(
   ip: string,
   success: boolean
 ): Promise<void> {
-  await db.prepare(
-    'INSERT INTO login_attempts (ip, success) VALUES (?, ?)'
-  )
-    .bind(ip, success ? 1 : 0)
-    .run();
+  try {
+    await db.prepare(
+      'INSERT INTO login_attempts (ip, success) VALUES (?, ?)'
+    )
+      .bind(ip, success ? 1 : 0)
+      .run();
+  } catch {
+    // Ignore if migration not yet applied
+  }
 }

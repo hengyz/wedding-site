@@ -21,7 +21,15 @@ export function AdminLogin() {
       setToken(token);
       navigate('/admin', { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : '登录失败');
+      if (err instanceof ApiError) {
+        setError(
+          err.status === 503
+            ? `${err.message}。请在 Cloudflare Pages → Settings → Environment variables 中配置。`
+            : err.message
+        );
+      } else {
+        setError('登录失败');
+      }
     } finally {
       setLoading(false);
     }
