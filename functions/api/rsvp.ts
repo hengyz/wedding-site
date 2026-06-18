@@ -123,8 +123,51 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return error('提交过于频繁，请稍后再试', 429);
   }
 
-  const id = crypto.randomUUID();
   const now = new Date().toISOString();
+
+  const existing = await db.prepare(
+    'SELECT id FROM rsvp_responses WHERE name = ? LIMIT 1'
+  )
+    .bind(name)
+    .first<{ id: string }>();
+
+  if (existing) {
+    await db.prepare(
+      `UPDATE rsvp_responses SET
+        phone = ?, attendance = ?, adult_count = ?, child_count = ?,
+        arrival_time = ?, departure_time = ?, transport_type = ?,
+        pickup_location = ?, remark = ?, ip_hash = ?, user_agent = ?,
+        updated_at = ?
+      WHERE id = ?`
+    )
+      .bind(
+        phone,
+        attendance,
+        adultCount,
+        childCount,
+        arrivalTime,
+        departureTime,
+        transportType,
+        pickupLocation,
+        remark,
+        ipHash,
+        userAgent,
+        now,
+        existing.id
+      )
+      .run();
+
+    return json(
+      {
+        id: existing.id,
+        updated: true,
+        message: '您的回执已更新，我们已收到最新信息。',
+      },
+      200
+    );
+  }
+
+  const id = crypto.randomUUID();
 
   await db.prepare(
     `INSERT INTO rsvp_responses (
@@ -153,7 +196,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     .run();
 
   return json(
-    { id, message: '感谢您的回执，我们已收到您的信息。' },
+    {
+      id,
+      updated: false,
+      message: '感谢您的回执，我们已收到您的信息。',
+    },
     201
   );
 };

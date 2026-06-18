@@ -12,7 +12,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (request.method !== 'GET') return error('Method not allowed', 405);
 
   const { results } = await env.DB.prepare(
-    'SELECT * FROM rsvp_responses ORDER BY created_at DESC'
+    'SELECT * FROM rsvp_responses ORDER BY updated_at DESC'
   ).all();
 
   return json(results);

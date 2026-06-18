@@ -86,14 +86,14 @@ export function RsvpPage() {
       <header className="mb-6 text-center">
         <h1 className="section-title mb-2">赴宴回执</h1>
         <p className="text-sm leading-relaxed text-gray-500">
-          为了更好地安排座位、接待和交通，请您填写赴宴信息。
+          为了更好地安排座位、接待和交通，请您填写赴宴信息。同一姓名再次提交将更新之前的回执。
         </p>
       </header>
 
       {alreadySubmitted && !message && (
         <Card className="mb-4 border-champagne-400/40 bg-cream-100/80">
           <p className="text-sm text-champagne-600">
-            您已提交过回执，如需修改请重新提交。
+            您已提交过回执。如需修改，请填写相同姓名后重新提交，将自动覆盖之前的记录。
           </p>
         </Card>
       )}

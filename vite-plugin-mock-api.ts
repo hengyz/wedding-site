@@ -65,6 +65,7 @@ const seedPhotos = [
 let blessings = [
   { id: 1, name: '张三', content: '祝你们百年好合，永结同心！', status: 'approved', created_at: new Date().toISOString() },
   { id: 2, name: '李四', content: '新婚快乐，早生贵子！', status: 'approved', created_at: new Date().toISOString() },
+  { id: 3, name: '王五', content: '愿你们永浴爱河，幸福美满！', status: 'pending', created_at: new Date().toISOString() },
 ];
 
 type MockRsvp = {
@@ -100,7 +101,7 @@ let rsvpResponses: MockRsvp[] = [
     updated_at: new Date().toISOString(),
   },
 ];
-let nextBlessingId = 3;
+let nextBlessingId = 4;
 let nextScheduleId = 6;
 let nextPhotoId = 4;
 
@@ -181,9 +182,11 @@ export function mockApiPlugin(): Plugin {
               const data = JSON.parse(body || '{}');
               const now = new Date().toISOString();
               const showDetails = data.attendance === 'yes' || data.attendance === 'maybe';
-              const item: MockRsvp = {
-                id: crypto.randomUUID(),
-                name: data.name,
+              const name = String(data.name || '').trim();
+              const existingIdx = rsvpResponses.findIndex((r) => r.name === name);
+
+              const fields = {
+                name,
                 phone: data.phone || null,
                 attendance: data.attendance,
                 adult_count: showDetails ? (data.adultCount ?? 1) : 0,
@@ -193,11 +196,37 @@ export function mockApiPlugin(): Plugin {
                 transport_type: showDetails ? (data.transportType || null) : null,
                 pickup_location: data.pickupLocation || null,
                 remark: data.remark || null,
-                created_at: now,
                 updated_at: now,
               };
+
+              if (existingIdx >= 0) {
+                const existing = rsvpResponses[existingIdx];
+                rsvpResponses[existingIdx] = { ...existing, ...fields };
+                send(
+                  {
+                    id: existing.id,
+                    updated: true,
+                    message: '您的回执已更新，我们已收到最新信息。',
+                  },
+                  200
+                );
+                return;
+              }
+
+              const item: MockRsvp = {
+                id: crypto.randomUUID(),
+                ...fields,
+                created_at: now,
+              };
               rsvpResponses.unshift(item);
-              send({ id: item.id, message: '感谢您的回执，我们已收到您的信息。' }, 201);
+              send(
+                {
+                  id: item.id,
+                  updated: false,
+                  message: '感谢您的回执，我们已收到您的信息。',
+                },
+                201
+              );
             });
             return;
           }
@@ -335,6 +364,28 @@ export function mockApiPlugin(): Plugin {
           if (path === '/api/admin/blessings' && method === 'GET') {
             if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
             return send(blessings);
+          }
+
+          if (path === '/api/admin/blessings' && method === 'POST') {
+            if (!isAdmin) return send({ error: 'Unauthorized' }, 401);
+            let body = '';
+            req.on('data', (chunk) => { body += chunk; });
+            req.on('end', () => {
+              const data = JSON.parse(body || '{}');
+              if (data.action !== 'approve_all_pending') {
+                return send({ error: '无效的操作' }, 400);
+              }
+              let updated = 0;
+              blessings = blessings.map((b) => {
+                if (b.status === 'pending') {
+                  updated += 1;
+                  return { ...b, status: 'approved' };
+                }
+                return b;
+              });
+              send({ updated });
+            });
+            return;
           }
 
           const blessingMatch = path.match(/^\/api\/admin\/blessings\/(\d+)$/);

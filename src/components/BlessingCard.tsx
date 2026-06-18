@@ -27,7 +27,10 @@ export function BlessingCard({ blessing, index }: BlessingCardProps) {
   const accent = ACCENT_DOTS[index % ACCENT_DOTS.length];
 
   return (
-    <article className="blessing-glass-card group">
+    <article
+      className="blessing-glass-card blessing-glass-card-animated group"
+      style={{ '--card-i': index } as React.CSSProperties}
+    >
       <div className="blessing-glass-shine" aria-hidden />
 
       <div className="relative z-[1] flex items-start gap-3">

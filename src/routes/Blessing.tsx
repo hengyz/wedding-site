@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { api, ApiError } from '../lib/api';
+import { BLESSING_TEMPLATES } from '../lib/blessing-templates';
 import { BlessingCard } from '../components/BlessingCard';
+import { BlessingSuccessEffect } from '../components/BlessingSuccessEffect';
 import { Input } from '../components/Input';
 import { Textarea } from '../components/Textarea';
 import { Button } from '../components/Button';
@@ -10,7 +12,10 @@ import { PageError, PageLoading } from '../components/PageState';
 const glassInputClass =
   'border-white/50 bg-white/40 backdrop-blur-sm placeholder:text-gray-400/70 focus:border-champagne-400/60 focus:bg-white/55 focus:ring-champagne-400/20';
 
+const MAX_CONTENT = 200;
+
 export function BlessingPage() {
+  const listRef = useRef<HTMLElement>(null);
   const {
     data: blessings,
     loading: listLoading,
@@ -22,6 +27,19 @@ export function BlessingPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [successFly, setSuccessFly] = useState<{ name: string; content: string } | null>(
+    null
+  );
+
+  const applyTemplate = (text: string) => {
+    setContent(text.slice(0, MAX_CONTENT));
+    setError('');
+  };
+
+  const handleSuccessComplete = useCallback(() => {
+    setSuccessFly(null);
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +51,16 @@ export function BlessingPage() {
       return;
     }
 
+    const submittedName = name.trim();
+    const submittedContent = content.trim();
+
     setLoading(true);
     try {
-      const res = await api.submitBlessing({ name, content });
+      const res = await api.submitBlessing({
+        name: submittedName,
+        content: submittedContent,
+      });
+      setSuccessFly({ name: submittedName, content: submittedContent });
       setMessage(res.message);
       setName('');
       setContent('');
@@ -49,6 +74,14 @@ export function BlessingPage() {
 
   return (
     <div className="blessing-page relative">
+      {successFly && (
+        <BlessingSuccessEffect
+          name={successFly.name}
+          content={successFly.content}
+          onComplete={handleSuccessComplete}
+        />
+      )}
+
       <div className="blessing-ambient" aria-hidden>
         <div className="blessing-blob blessing-blob-1" />
         <div className="blessing-blob blessing-blob-2" />
@@ -84,21 +117,46 @@ export function BlessingPage() {
               maxLength={20}
               className={glassInputClass}
             />
-            <Textarea
-              label="祝福语"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="写下对新人的祝福..."
-              maxLength={200}
-              className={glassInputClass}
-            />
+
+            <div className="space-y-2">
+              <Textarea
+                label="祝福语"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="写下对新人的祝福..."
+                maxLength={MAX_CONTENT}
+                className={glassInputClass}
+              />
+              <div className="flex items-center justify-between text-[11px] text-gray-400">
+                <span>点选模板可快速填写，也可自由修改</span>
+                <span className={content.length >= MAX_CONTENT ? 'text-champagne-600' : ''}>
+                  {content.length}/{MAX_CONTENT}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {BLESSING_TEMPLATES.map((template) => {
+                  const active = content === template.content;
+                  return (
+                    <button
+                      key={template.label}
+                      type="button"
+                      onClick={() => applyTemplate(template.content)}
+                      className={`blessing-template-chip ${active ? 'blessing-template-chip-active' : ''}`}
+                    >
+                      {template.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {error && (
               <p className="rounded-xl bg-red-50/70 px-3 py-2 text-sm text-red-500 backdrop-blur-sm">
                 {error}
               </p>
             )}
-            {message && (
+            {message && !successFly && (
               <p className="rounded-xl bg-green-50/70 px-3 py-2 text-sm text-green-600 backdrop-blur-sm">
                 {message}
               </p>
@@ -107,7 +165,7 @@ export function BlessingPage() {
             <Button
               type="submit"
               fullWidth
-              disabled={loading}
+              disabled={loading || !!successFly}
               className="blessing-submit-btn shadow-lg shadow-champagne-500/20 transition-all duration-500 hover:shadow-xl hover:shadow-champagne-500/30"
             >
               {loading ? '提交中...' : '送出祝福 💌'}
@@ -115,7 +173,7 @@ export function BlessingPage() {
           </form>
         </section>
 
-        <section>
+        <section ref={listRef}>
           <div className="mb-6 text-center">
             <h2 className="font-serif text-xl text-champagne-600">大家的祝福</h2>
             {blessings && blessings.length > 0 && (

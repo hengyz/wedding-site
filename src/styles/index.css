@@ -117,6 +117,49 @@
     transform: translateY(-1px);
   }
 
+  .blessing-template-chip {
+    @apply cursor-pointer rounded-full border border-white/60 bg-white/45 px-3 py-1.5
+           text-xs text-gray-600 backdrop-blur-sm transition-all duration-300
+           hover:border-champagne-400/50 hover:bg-white/70 hover:text-champagne-600;
+  }
+
+  .blessing-template-chip-active {
+    @apply border-champagne-500 bg-champagne-500/15 font-medium text-champagne-600
+           ring-1 ring-champagne-400/25;
+  }
+
+  .blessing-success-overlay {
+    @apply pointer-events-none fixed inset-0 z-50 flex items-center justify-center;
+  }
+
+  .blessing-success-backdrop {
+    @apply absolute inset-0 bg-white/25 backdrop-blur-[2px];
+    animation: blessing-success-fade 2.2s ease-out forwards;
+  }
+
+  .blessing-success-fly-card {
+    @apply blessing-glass-card relative z-10 w-[min(18rem,calc(100vw-3rem))] p-4;
+    animation: blessing-success-fly 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .blessing-success-heart {
+    @apply absolute left-1/2 top-1/2 z-20 text-xl;
+    --heart-i: 0;
+    animation: blessing-success-heart 1.6s ease-out forwards;
+    animation-delay: calc(var(--heart-i) * 0.08s);
+    opacity: 0;
+  }
+
+  .blessing-success-message {
+    @apply absolute bottom-[28%] z-10 font-serif text-base font-medium text-champagne-600;
+    animation: blessing-success-message 2.2s ease-out forwards;
+  }
+
+  .blessing-glass-card-animated {
+    animation: blessing-fade-up 0.55s ease-out both;
+    animation-delay: calc(var(--card-i, 0) * 0.06s);
+  }
+
   .rsvp-option-card {
     @apply flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-cream-200
            bg-white/90 p-4 transition-all duration-300 hover:border-champagne-400/50
@@ -171,9 +214,84 @@
   }
 }
 
+@keyframes blessing-success-fly {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.88) rotate(-2deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-28px) scale(1.03) rotate(1deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(42vh) scale(0.82) rotate(2deg);
+  }
+}
+
+@keyframes blessing-success-heart {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + (var(--heart-i) - 2) * 28px),
+        calc(-50% - 72px - var(--heart-i) * 12px)
+      )
+      scale(0.7);
+  }
+}
+
+@keyframes blessing-success-message {
+  0%,
+  15% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  30%,
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes blessing-success-fade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .blessing-blob,
-  .blessing-glass-card {
+  .blessing-glass-card,
+  .blessing-glass-card-animated,
+  .blessing-success-fly-card,
+  .blessing-success-heart,
+  .blessing-success-message,
+  .blessing-success-backdrop {
     animation: none !important;
   }
 }

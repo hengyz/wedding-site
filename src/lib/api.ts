@@ -119,7 +119,7 @@ export const api = {
     }),
 
   submitRsvp: (data: RsvpSubmit) =>
-    request<{ id: string; message: string }>('/api/rsvp', {
+    request<{ id: string; message: string; updated?: boolean }>('/api/rsvp', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -248,6 +248,13 @@ export const api = {
 
   adminGetBlessings: () =>
     request<Blessing[]>('/api/admin/blessings', { headers: authHeaders() }),
+
+  adminApproveAllPendingBlessings: () =>
+    request<{ updated: number }>('/api/admin/blessings', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'approve_all_pending' }),
+    }),
 
   adminUpdateBlessing: (id: number, status: string) =>
     request<Blessing>(`/api/admin/blessings/${id}`, {
