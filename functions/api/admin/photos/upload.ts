@@ -6,6 +6,10 @@ import {
   formatPhotoFilename,
   resolveCaptureDate,
 } from '../../../utils/photo-date';
+import {
+  buildThumbnailKey,
+  generateThumbnail,
+} from '../../../utils/thumbnail';
 import { error, handleOptions, json } from '../../../utils/response';
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -91,6 +95,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   });
 
   const url = publicUrl(env, key)!;
+  let thumbnailUrl = url;
+
+  const thumb = await generateThumbnail(buffer, file.type);
+  if (thumb) {
+    const thumbKey = buildThumbnailKey(key);
+    await env.PHOTOS.put(thumbKey, thumb.buffer, {
+      httpMetadata: { contentType: thumb.contentType },
+    });
+    thumbnailUrl = publicUrl(env, thumbKey)!;
+  }
 
   const count = await db.prepare('SELECT COUNT(*) as c FROM photos')
     .first<{ c: number }>();
@@ -99,7 +113,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     `INSERT INTO photos (url, thumbnail_url, category, title, sort_order, enabled)
      VALUES (?, ?, ?, ?, ?, 1)`
   )
-    .bind(url, url, category, title, (count?.c ?? 0) + 1)
+    .bind(url, thumbnailUrl, category, title, (count?.c ?? 0) + 1)
     .run();
 
   const item = await db.prepare('SELECT * FROM photos WHERE id = ?')

@@ -127,7 +127,7 @@ export function PhotoManager() {
           {uploading ? '上传中...' : '选择图片上传'}
         </Button>
         <p className="text-xs text-gray-400">
-          支持 JPG/PNG/WebP/GIF，单张最大 10MB，可多选。文件名按拍摄时间命名（如 20250609143025.jpg）
+          支持 JPG/PNG/WebP/GIF，单张最大 10MB，可多选。上传后自动生成 WebP 缩略图（约 480px）用于相册列表。
         </p>
         {uploadMsg && (
           <p className={`text-sm ${uploadMsg.includes('成功') ? 'text-green-600' : 'text-red-500'}`}>
@@ -157,7 +157,7 @@ export function PhotoManager() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? '编辑照片' : '手动添加 URL'}>
         <div className="space-y-3">
           <Input label="图片 URL *" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
-          <Input label="缩略图 URL" value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="留空则使用原图" />
+          <Input label="缩略图 URL" value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="留空则使用原图；R2 上传会自动生成" />
           <Input label="标题" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>

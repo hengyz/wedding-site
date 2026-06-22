@@ -1,5 +1,6 @@
-import type { Env } from '../types';
+import type { Env, Photo } from '../types';
 import { requireDb, isDbError } from '../utils/db';
+import { resolveDisplayThumbnailUrl } from '../utils/thumbnail';
 import { error, handleOptions, json } from '../utils/response';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -24,8 +25,18 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   const stmt = db.prepare(query);
   const { results } = params.length
-    ? await stmt.bind(...params).all()
-    : await stmt.all();
+    ? await stmt.bind(...params).all<Photo>()
+    : await stmt.all<Photo>();
 
-  return json(results);
+  const r2PublicUrl = context.env.R2_PUBLIC_URL;
+  const photos = (results ?? []).map((photo) => ({
+    ...photo,
+    thumbnail_url: resolveDisplayThumbnailUrl(
+      photo.url,
+      photo.thumbnail_url,
+      r2PublicUrl
+    ),
+  }));
+
+  return json(photos);
 };
