@@ -275,8 +275,8 @@ export const api = {
 
 export const PHOTO_CATEGORIES: Record<string, string> = {
   pre_wedding: '婚纱照',
+  certificate: '领证照',
   wedding_day: '婚礼现场',
-  travel: '旅行照片',
 };
 
 export const SITE_MODES: Record<string, string> = {
