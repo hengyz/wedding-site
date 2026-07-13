@@ -37,7 +37,6 @@ export function publicConfig(config: SiteConfig) {
     photo_live_url: config.photo_live_url,
     amap_url: config.amap_url,
     baidu_map_url: config.baidu_map_url,
-    tencent_map_url: config.tencent_map_url,
     dress_code: config.dress_code,
     notes: config.notes,
     mode: resolveEffectiveMode(config.wedding_date),

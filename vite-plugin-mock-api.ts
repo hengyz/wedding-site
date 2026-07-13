@@ -17,7 +17,6 @@ const seedConfig = {
   photo_live_url: '',
   amap_url: '',
   baidu_map_url: '',
-  tencent_map_url: '',
   dress_code: '建议穿着正装或礼服，浅色系为佳。',
   notes: '请准时到场，如有特殊饮食需求请提前告知新人。',
   mode: 'before_wedding' as const,

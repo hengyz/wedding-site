@@ -139,7 +139,6 @@ export function ConfigEditor() {
         <Input label="照片直播链接" value={form.photo_live_url || ''} onChange={(e) => update('photo_live_url', e.target.value)} />
         <Input label="高德地图链接" value={form.amap_url || ''} onChange={(e) => update('amap_url', e.target.value)} placeholder="留空则自动生成" />
         <Input label="百度地图链接" value={form.baidu_map_url || ''} onChange={(e) => update('baidu_map_url', e.target.value)} />
-        <Input label="腾讯地图链接" value={form.tencent_map_url || ''} onChange={(e) => update('tencent_map_url', e.target.value)} />
         <Textarea label="着装建议" value={form.dress_code || ''} onChange={(e) => update('dress_code', e.target.value)} />
         <Textarea label="注意事项" value={form.notes || ''} onChange={(e) => update('notes', e.target.value)} />
         <div className="rounded-xl border border-cream-200 bg-cream-50 px-4 py-3">

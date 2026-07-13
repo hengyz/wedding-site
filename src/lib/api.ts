@@ -12,7 +12,6 @@ export interface SiteConfig {
   photo_live_url: string;
   amap_url: string;
   baidu_map_url: string;
-  tencent_map_url: string;
   dress_code: string;
   notes: string;
   mode: 'before_wedding' | 'wedding_day' | 'after_wedding';

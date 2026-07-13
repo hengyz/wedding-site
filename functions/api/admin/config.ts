@@ -31,7 +31,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       'venue_name', 'venue_address',
       'hero_image_url',
       'mv_url', 'mv_cover_url', 'photo_live_url',
-      'amap_url', 'baidu_map_url', 'tencent_map_url',
+      'amap_url', 'baidu_map_url',
       'dress_code', 'notes',
     ] as const;
 

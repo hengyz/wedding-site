@@ -4,24 +4,17 @@ import { Button } from '../components/Button';
 import { usePageLoad } from '../hooks/usePageLoad';
 import { PageError, PageLoading } from '../components/PageState';
 
-function buildMapUrl(
-  type: 'amap' | 'baidu' | 'tencent',
-  config: SiteConfig
-): string {
+function buildMapUrl(type: 'amap' | 'baidu', config: SiteConfig): string {
   const address = encodeURIComponent(config.venue_address);
   const name = encodeURIComponent(config.venue_name);
 
   if (type === 'amap' && config.amap_url) return config.amap_url;
   if (type === 'baidu' && config.baidu_map_url) return config.baidu_map_url;
-  if (type === 'tencent' && config.tencent_map_url) return config.tencent_map_url;
 
   if (type === 'amap') {
     return `https://uri.amap.com/marker?position=&name=${name}&address=${address}&src=wedding&coordinate=gaode&callnative=1`;
   }
-  if (type === 'baidu') {
-    return `https://api.map.baidu.com/marker?title=${name}&content=${address}&output=html&src=webapp`;
-  }
-  return `https://apis.map.qq.com/uri/v1/search?keyword=${name}&referer=wedding`;
+  return `https://api.map.baidu.com/marker?title=${name}&content=${address}&output=html&src=webapp`;
 }
 
 export function MapPage() {
@@ -38,7 +31,6 @@ export function MapPage() {
   const maps = [
     { type: 'amap' as const, label: '高德地图', color: 'bg-blue-500' },
     { type: 'baidu' as const, label: '百度地图', color: 'bg-red-500' },
-    { type: 'tencent' as const, label: '腾讯地图', color: 'bg-green-500' },
   ];
 
   return (
