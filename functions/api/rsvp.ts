@@ -41,10 +41,15 @@ const MAX_PICKUP = 100;
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MINUTES = 1;
 
-function clampCount(value: unknown, fallback: number): number {
-  const n = typeof value === 'number' ? value : fallback;
-  if (!Number.isFinite(n)) return fallback;
-  return Math.min(10, Math.max(0, Math.floor(n)));
+function parseCount(
+  value: unknown,
+  min: number,
+  max: number
+): number | null {
+  if (value === undefined || value === null) return null;
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < min || n > max) return null;
+  return n;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -80,12 +85,24 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   let pickupLocation: string | null = null;
 
   if (attendance === 'yes' || attendance === 'maybe') {
-    adultCount = clampCount(body.adultCount, 1);
-    childCount = clampCount(body.childCount, 0);
-
-    if (body.adultCount === undefined || body.adultCount === null) {
-      return error('请填写成人数');
+    const parsedAdults = parseCount(body.adultCount, 1, 10);
+    if (parsedAdults === null) {
+      return error(
+        body.adultCount === undefined || body.adultCount === null
+          ? '请填写成人数'
+          : '成人数需在 1-10 之间'
+      );
     }
+    adultCount = parsedAdults;
+
+    const parsedChildren =
+      body.childCount === undefined || body.childCount === null
+        ? 0
+        : parseCount(body.childCount, 0, 10);
+    if (parsedChildren === null) {
+      return error('儿童数需在 0-10 之间');
+    }
+    childCount = parsedChildren;
 
     arrivalTime = body.arrivalTime?.trim() || null;
     departureTime = body.departureTime?.trim() || null;

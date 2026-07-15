@@ -72,3 +72,67 @@ export const RSVP_TRANSPORT_LABELS: Record<RsvpTransportType, string> = {
 };
 
 export const RSVP_STORAGE_KEY = 'rsvp_submitted';
+
+export const RSVP_ADULT_MIN = 1;
+export const RSVP_ADULT_MAX = 10;
+export const RSVP_CHILD_MIN = 0;
+export const RSVP_CHILD_MAX = 10;
+
+type RsvpCountResult =
+  | { ok: true; value: number }
+  | { ok: false; message: string };
+
+/** Keep only digits so number inputs stay easy to clear and re-type. */
+export function sanitizeRsvpCountInput(value: string): string {
+  return value.replace(/\D/g, '').slice(0, 2);
+}
+
+export function stepRsvpCount(
+  value: string,
+  delta: number,
+  min: number,
+  max: number
+): string {
+  const trimmed = value.trim();
+
+  if (trimmed === '') {
+    if (delta > 0) return String(min);
+    return '';
+  }
+
+  const current = Number(trimmed);
+  if (Number.isNaN(current)) return String(min);
+
+  const next = Math.min(max, Math.max(min, current + delta));
+  return String(next);
+}
+
+export function parseRsvpAdultCount(value: string): RsvpCountResult {
+  const trimmed = value.trim();
+  if (!trimmed) return { ok: false, message: '请填写成人数' };
+
+  const n = Number(trimmed);
+  if (!Number.isInteger(n) || n < RSVP_ADULT_MIN || n > RSVP_ADULT_MAX) {
+    return {
+      ok: false,
+      message: `成人数需在 ${RSVP_ADULT_MIN}-${RSVP_ADULT_MAX} 之间`,
+    };
+  }
+
+  return { ok: true, value: n };
+}
+
+export function parseRsvpChildCount(value: string): RsvpCountResult {
+  const trimmed = value.trim();
+  if (!trimmed) return { ok: true, value: 0 };
+
+  const n = Number(trimmed);
+  if (!Number.isInteger(n) || n < RSVP_CHILD_MIN || n > RSVP_CHILD_MAX) {
+    return {
+      ok: false,
+      message: `儿童数需在 ${RSVP_CHILD_MIN}-${RSVP_CHILD_MAX} 之间`,
+    };
+  }
+
+  return { ok: true, value: n };
+}

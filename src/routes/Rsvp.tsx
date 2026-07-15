@@ -2,12 +2,19 @@ import { useEffect, useState } from 'react';
 import { api, ApiError } from '../lib/api';
 import {
   RSVP_ATTENDANCE_OPTIONS,
+  RSVP_ADULT_MAX,
+  RSVP_ADULT_MIN,
+  RSVP_CHILD_MAX,
+  RSVP_CHILD_MIN,
   RSVP_STORAGE_KEY,
   RSVP_TRANSPORT_OPTIONS,
+  parseRsvpAdultCount,
+  parseRsvpChildCount,
   type RsvpAttendance,
   type RsvpTransportType,
 } from '../lib/rsvp';
 import { Input } from '../components/Input';
+import { CountStepper } from '../components/CountStepper';
 import { Textarea } from '../components/Textarea';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -16,8 +23,8 @@ export function RsvpPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [attendance, setAttendance] = useState<RsvpAttendance | ''>('');
-  const [adultCount, setAdultCount] = useState(1);
-  const [childCount, setChildCount] = useState(0);
+  const [adultCount, setAdultCount] = useState('0');
+  const [childCount, setChildCount] = useState('0');
   const [arrivalTime, setArrivalTime] = useState('');
   const [departureTime, setDepartureTime] = useState('');
   const [transportType, setTransportType] = useState<RsvpTransportType | ''>('');
@@ -26,6 +33,8 @@ export function RsvpPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [adultCountError, setAdultCountError] = useState('');
+  const [childCountError, setChildCountError] = useState('');
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
   useEffect(() => {
@@ -34,11 +43,19 @@ export function RsvpPage() {
 
   const showDetails = attendance === 'yes' || attendance === 'maybe';
   const showPickup = showDetails && transportType === 'need_pickup';
+  const parsedAdults = showDetails ? parseRsvpAdultCount(adultCount) : null;
+  const parsedChildren = showDetails ? parseRsvpChildCount(childCount) : null;
+  const guestTotal =
+    parsedAdults?.ok && parsedChildren?.ok
+      ? parsedAdults.value + parsedChildren.value
+      : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setAdultCountError('');
+    setChildCountError('');
 
     if (!name.trim()) {
       setError('请填写姓名');
@@ -48,9 +65,24 @@ export function RsvpPage() {
       setError('请选择是否参加');
       return;
     }
-    if (showDetails && (adultCount < 0 || adultCount > 10)) {
-      setError('成人数需在 0-10 之间');
-      return;
+
+    let adults: number | undefined;
+    let children: number | undefined;
+
+    if (showDetails) {
+      const adultResult = parseRsvpAdultCount(adultCount);
+      if (!adultResult.ok) {
+        setAdultCountError(adultResult.message);
+        return;
+      }
+      adults = adultResult.value;
+
+      const childResult = parseRsvpChildCount(childCount);
+      if (!childResult.ok) {
+        setChildCountError(childResult.message);
+        return;
+      }
+      children = childResult.value;
     }
     if (showPickup && !pickupLocation.trim()) {
       setError('请填写接站地点');
@@ -63,8 +95,8 @@ export function RsvpPage() {
         name: name.trim(),
         phone: phone.trim() || undefined,
         attendance,
-        adultCount: showDetails ? adultCount : undefined,
-        childCount: showDetails ? childCount : undefined,
+        adultCount: adults,
+        childCount: children,
         arrivalTime: showDetails && arrivalTime ? arrivalTime : undefined,
         departureTime: showDetails && departureTime ? departureTime : undefined,
         transportType: showDetails && transportType ? transportType : undefined,
@@ -151,23 +183,32 @@ export function RsvpPage() {
           {showDetails && (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label="成人数 *"
-                  type="number"
-                  min={0}
-                  max={10}
+                <CountStepper
+                  label="成人数"
+                  min={RSVP_ADULT_MIN}
+                  max={RSVP_ADULT_MAX}
                   value={adultCount}
-                  onChange={(e) => setAdultCount(Number(e.target.value))}
+                  error={adultCountError}
+                  onChange={(next) => {
+                    setAdultCount(next);
+                    setAdultCountError('');
+                  }}
                 />
-                <Input
+                <CountStepper
                   label="儿童数"
-                  type="number"
-                  min={0}
-                  max={10}
+                  min={RSVP_CHILD_MIN}
+                  max={RSVP_CHILD_MAX}
                   value={childCount}
-                  onChange={(e) => setChildCount(Number(e.target.value))}
+                  error={childCountError}
+                  onChange={(next) => {
+                    setChildCount(next);
+                    setChildCountError('');
+                  }}
                 />
               </div>
+              {guestTotal !== null && (
+                <p className="-mt-2 text-xs text-gray-400">当前合计 {guestTotal} 人</p>
+              )}
 
               <Input
                 label="抵达时间"
